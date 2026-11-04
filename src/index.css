@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-cream font-sans text-cocoa antialiased;
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid #6d5247;
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Tienda */
+  .chip {
+    @apply inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-full border-[1.5px] border-line2 bg-white px-4 text-[13px] font-medium text-cocoa transition;
+  }
+  .chip-on {
+    @apply border-cocoa bg-cocoa font-semibold text-cream;
+  }
+  .field {
+    @apply h-12 w-full min-w-0 rounded-2xl border-[1.5px] border-line2 bg-white px-3.5 text-[15px] text-cocoa placeholder:text-[#9A7F74] focus:border-cocoa focus:outline-none;
+  }
+  .label {
+    @apply flex flex-col gap-1.5 text-xs font-semibold text-cocoa;
+  }
+  .btn-primary {
+    @apply inline-flex h-14 items-center justify-center gap-2 rounded-full bg-cocoa px-6 text-[15px] font-semibold text-cream transition hover:bg-cocoa2 active:scale-[0.98] disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex h-12 items-center justify-center gap-2 rounded-full border-[1.5px] border-cocoa px-5 text-[14px] font-semibold text-cocoa transition hover:bg-white active:scale-[0.98] disabled:opacity-40;
+  }
+  .card {
+    @apply rounded-[20px] bg-white;
+  }
+
+  /* Panel */
+  .a-card {
+    @apply rounded-2xl border border-line bg-white;
+  }
+  .a-field {
+    @apply h-11 w-full min-w-0 rounded-xl border border-line2 bg-white px-3 text-sm text-cocoa placeholder:text-[#9A7F74] transition focus:border-cocoa focus:outline-none focus:ring-2 focus:ring-cocoa/10;
+  }
+  .a-select {
+    @apply h-11 w-full min-w-0 cursor-pointer appearance-none rounded-xl border border-line2 bg-white px-3 pr-9 text-sm font-medium text-cocoa transition hover:border-mauve focus:border-cocoa focus:outline-none focus:ring-2 focus:ring-cocoa/10;
+  }
+  .a-label {
+    @apply flex flex-col gap-1 text-xs font-semibold text-cocoa;
+  }
+  .a-btn {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-line2 bg-white px-4 text-sm font-semibold text-cocoa transition hover:bg-sand disabled:opacity-50;
+  }
+  .a-btn-dark {
+    @apply inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-cocoa px-4 text-sm font-semibold text-cream transition hover:bg-cocoa2 disabled:opacity-50;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Algo nuevo apareció en pantalla (ej. datos de pago al elegir el método) */
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.97);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(2px) scale(1.01);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes reveal-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(247, 168, 230, 0);
+  }
+  30% {
+    box-shadow: 0 0 0 4px rgba(247, 168, 230, 0.7);
+  }
+}
+.animate-reveal {
+  animation:
+    reveal 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    reveal-glow 0.9s ease-out;
+  border-radius: 1.25rem;
+}
+
+/* Estrellas del brandboard girando muy despacio en el banner */
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin-slow,
+  .animate-reveal {
+    animation: none;
+  }
+}
+
+/* Banner: la foto entra suave */
+@keyframes hero-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-hero-in {
+  animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
