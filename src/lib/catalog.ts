@@ -20,6 +20,8 @@ export interface CatalogProduct {
   image: string
   badge?: string
   description?: string
+  /** Entra oculto en la tienda (ej. le falta el precio) */
+  hidden?: boolean
   swatch?: string
   tones?: CatalogTone[]
 }
@@ -386,7 +388,38 @@ export const CATALOG: CatalogProduct[] = [
     price: 6,
     wholesale: 4,
     image: img('lapiz-cejas'),
-    tones: tones([['Taupe', '#8A7262']])
+    description: 'Set de 2 lápices retráctiles con cepillo. En set solo viene en Neutral Brown.',
+    swatch: chart('lapiz-cejas'),
+    tones: tones([['Neutral Brown', '#5E4433']])
+  },
+  {
+    // Precio pendiente: entra oculto hasta que se le ponga precio desde el panel
+    slug: 'lapiz-cejas-individual',
+    name: 'Lápiz de cejas',
+    subtitle: 'Instant Lift Brow Pencil · individual',
+    brand: 'e.l.f.',
+    category: 'Ojos y cejas',
+    price: 0,
+    wholesale: null,
+    image: img('lapiz-cejas-individual'),
+    description: 'Lápiz retráctil con cepillo, por unidad.',
+    swatch: chart('lapiz-cejas'),
+    hidden: true,
+    tones: tones([
+      ['Taupe', '#8A7262'],
+      ['Deep Brown', '#3E2A20']
+    ])
+  },
+  {
+    slug: 'delineador-plumon',
+    name: 'Delineador plumón negro',
+    subtitle: 'Eyeliner Pen',
+    brand: 'e.l.f.',
+    category: 'Ojos y cejas',
+    price: 8,
+    wholesale: null,
+    image: img('delineador-plumon'),
+    description: 'Delineador líquido tipo plumón, punta fina.'
   },
   {
     slug: 'gel-cejas-pestanas',
@@ -401,13 +434,18 @@ export const CATALOG: CatalogProduct[] = [
   {
     slug: 'paleta-sombras',
     name: 'Paleta de sombras',
-    subtitle: 'Paleta de 10 tonos',
+    subtitle: 'Perfect 10 Eyeshadow · 10 tonos',
     brand: 'e.l.f.',
     category: 'Ojos y cejas',
     price: 11,
     wholesale: 9,
-    image: img('paleta-sombras'),
-    badge: 'Nuevo'
+    image: img('paleta-need-it-nude'),
+    badge: 'Nuevo',
+    swatch: chart('paleta-sombras'),
+    tones: [
+      { name: 'Need It Nude', hex: '#C9A58C', image: img('paleta-need-it-nude') },
+      { name: 'Everyday Smoky', hex: '#5A4A44', image: img('paleta-everyday-smoky') }
+    ]
   },
   {
     slug: 'brocha-liquidos-polvos',
@@ -422,7 +460,7 @@ export const CATALOG: CatalogProduct[] = [
   {
     slug: 'brocha-base',
     name: 'Brocha para base',
-    subtitle: 'Foundation Brush',
+    subtitle: 'Buffing Foundation Brush',
     brand: 'e.l.f.',
     category: 'Brochas',
     price: 8,

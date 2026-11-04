@@ -55,7 +55,7 @@ function seed(): DemoDb {
       image_url: asset(c.image),
       images: [asset(c.image)],
       swatch_url: c.swatch ? asset(c.swatch) : null,
-      active: true,
+      active: !c.hidden,
       sort: i,
       created_at: new Date(now - i * 60000).toISOString(),
       variants

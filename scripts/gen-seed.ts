@@ -25,9 +25,9 @@ const out: string[] = [
 CATALOG.forEach((p, i) => {
   out.push(`  -- ${p.name}`)
   out.push(
-    `  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort)` +
+    `  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active)` +
       ` values (${q(p.name)}, ${q(p.subtitle)}, ${q(p.brand)}, ${q(p.category)}, ${q(p.badge ?? '')}, ${q(p.description ?? '')}, ${p.price}, ${n(p.wholesale)},` +
-      ` ${q(p.image)}, ${q(JSON.stringify([p.image]))}::jsonb, ${q(p.swatch ?? null)}, ${i}) returning id into pid;`
+      ` ${q(p.image)}, ${q(JSON.stringify([p.image]))}::jsonb, ${q(p.swatch ?? null)}, ${i}, ${p.hidden ? 'false' : 'true'}) returning id into pid;`
   )
   if (p.tones?.length) {
     const rows = p.tones.map((t, k) => `(pid, ${q(t.name)}, ${q(t.hex)}, ${q(t.image ?? null)}, ${q(t.grp ?? '')}, ${k}, 0)`)
