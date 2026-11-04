@@ -2,7 +2,7 @@
 
 Tienda web instalable (PWA) de **Twins Beauty** (@twinsbeauty.sc): maquillaje original con tonos, precio al detal y al mayor, pedidos por WhatsApp y un panel admin pensado para que la dueña lo maneje sola desde el teléfono.
 
-Hecha con React + Vite + Tailwind, Supabase (base de datos, login y fotos) y publicada en Vercel.
+Hecha con React + Vite + Tailwind, Supabase (base de datos, login y fotos) y publicada en Cloudflare Pages (su plan gratis permite uso comercial).
 
 ## Lo que hace
 
@@ -31,11 +31,23 @@ Hecha con React + Vite + Tailwind, Supabase (base de datos, login y fotos) y pub
    ```sql
    insert into public.admins (email) values ('correo-de-la-duena@gmail.com');
    ```
-3. **Variables**: copia `.env.example` como `.env.local` y pega la URL y la *anon key* (Supabase → Project Settings → API). En Vercel van como variables de entorno con los mismos nombres.
+3. **Variables**: copia `.env.example` como `.env.local` y pega la URL (sin `/rest/v1`) y la *publishable key* (Supabase → Project Settings → API Keys). En el hosting van como variables de entorno con los mismos nombres.
 4. `npm install` y `npm run dev`.
 5. Entrar a `/admin`, completar **Ajustes** (WhatsApp, métodos de pago, mínimo al mayor) y cargar las cantidades en **Inventario**.
 
 Sin variables de Supabase la app corre en **modo demo**: todo se guarda en el navegador y la contraseña del panel es `twins2026`. `npm run build:demo` genera esa versión para enseñarla sin base de datos.
+
+## Publicar en Cloudflare Pages
+
+1. Cloudflare → **Workers & Pages → Create → Pages → Connect to Git** y elegir `twins-beauty`.
+2. Framework preset **Vite** (o a mano: build command `npm run build`, output `dist`).
+3. Variables de entorno (Production y Preview):
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_SITE_URL` = `https://<nombre-del-proyecto>.pages.dev` (o el dominio propio cuando lo haya)
+4. Save and Deploy. Cada `git push` a `main` vuelve a publicar solo.
+
+No hace falta archivo de redirecciones: como no hay `404.html`, Cloudflare manda todas las rutas (`/admin`, `/producto/...`) a la app. `public/_headers` controla la caché y `.nvmrc` fija Node 22.
 
 ## Catálogo inicial
 

@@ -3,10 +3,12 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // Dirección pública del sitio, para que WhatsApp e Instagram encuentren la imagen de vista previa.
-// En Vercel sale sola de VERCEL_PROJECT_PRODUCTION_URL; con dominio propio se puede fijar con VITE_SITE_URL.
+// En Cloudflare Pages se fija con la variable VITE_SITE_URL (ej. https://twins-beauty.pages.dev o el dominio propio).
+// Si no está, se usa la que da el hosting (Cloudflare o Vercel) en el momento del build.
 function siteUrl() {
   const fixed = process.env.VITE_SITE_URL
   if (fixed) return fixed.replace(/\/+$/, '')
+  if (process.env.CF_PAGES_URL) return process.env.CF_PAGES_URL.replace(/\/+$/, '')
   const vercel = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL
   return vercel ? `https://${vercel}` : ''
 }
