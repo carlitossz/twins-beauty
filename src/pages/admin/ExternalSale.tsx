@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon, ProductImage, Spinner, ToneDot } from '../../components/ui'
 import { api } from '../../lib/api'
 import { errorMessage, hasTones, usd } from '../../lib/format'
@@ -35,6 +35,26 @@ export default function ExternalSale() {
   const [sending, setSending] = useState(false)
   const [formError, setFormError] = useState('')
   const [done, setDone] = useState<{ code: string } | null>(null)
+  // Aviso corto de lo último que se agregó (en teléfono sale en la barra de abajo)
+  const [lastAdded, setLastAdded] = useState('')
+  const summaryRef = useRef<HTMLDivElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  // La barra de abajo se esconde cuando la venta en curso ya está a la vista
+  const [summaryVisible, setSummaryVisible] = useState(false)
+  useEffect(() => {
+    const el = summaryRef.current
+    if (!el || typeof IntersectionObserver === 'undefined') return
+    const io = new IntersectionObserver(([e]) => setSummaryVisible(e.isIntersecting), { threshold: 0.15 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [products])
+
+  useEffect(() => {
+    if (!lastAdded) return
+    const t = setTimeout(() => setLastAdded(''), 1800)
+    return () => clearTimeout(t)
+  }, [lastAdded])
 
   const shown = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -47,6 +67,7 @@ export default function ExternalSale() {
   const pricing = priceCart(lines, min, wholesale)
 
   function add(p: Product, v: Variant) {
+    setLastAdded(`${p.name}${v.name ? ` · ${v.name}` : ''}`)
     setLines((c) => {
       const found = c.find((i) => i.variant_id === v.id)
       if ((found?.qty ?? 0) >= v.stock) return c
@@ -119,13 +140,35 @@ export default function ExternalSale() {
       )}
       {error && <ErrorBox message={error} onRetry={reload} />}
 
+      {/* Teléfono: la venta en curso siempre a la vista, con un toque baja hasta ella */}
+      {lines.length > 0 && !summaryVisible && (
+        <div className="fixed inset-x-3 bottom-[80px] z-10 lg:hidden">
+          <button
+            type="button"
+            onClick={() => summaryRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className={`flex w-full items-center justify-between gap-3 rounded-2xl bg-cocoa px-4 py-3 text-left text-cream shadow-[0_10px_28px_rgba(109,82,71,0.35)] ${lastAdded ? 'animate-reveal' : ''}`}
+            key={lastAdded || 'barra'}
+          >
+            <span className="min-w-0">
+              <span className="block text-sm font-bold">
+                Venta en curso · {lines.reduce((a, l) => a + l.qty, 0)} {lines.reduce((a, l) => a + l.qty, 0) === 1 ? 'producto' : 'productos'}
+              </span>
+              <span className="block truncate text-xs text-cream/85">{lastAdded ? `Agregado: ${lastAdded}` : `Total ${usd(pricing.total)}`}</span>
+            </span>
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-cream px-3 py-1.5 text-xs font-bold text-cocoa">
+              Ver venta <Icon name="chevron" size={14} />
+            </span>
+          </button>
+        </div>
+      )}
+
       {products && (
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+        <div className={`flex flex-col gap-5 lg:flex-row lg:items-start ${lines.length > 0 ? 'pb-20 lg:pb-0' : ''}`}>
           <div className="flex min-w-0 flex-1 flex-col gap-3">
             <label className="a-label">
               Buscar producto o tono
               <span className="relative">
-                <input className="a-field pl-9" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ej. Halo Glow, Wild Cherry…" />
+                <input ref={searchRef} className="a-field scroll-mt-24 pl-9" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Ej. Halo Glow, Wild Cherry…" />
                 <Icon name="search" size={16} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
               </span>
             </label>
@@ -137,8 +180,20 @@ export default function ExternalSale() {
             </div>
           </div>
 
-          <div className="a-card flex w-full flex-col gap-4 p-4 lg:sticky lg:top-6 lg:w-[370px] lg:shrink-0">
-            <h2 className="font-bold">Venta en curso</h2>
+          <div ref={summaryRef} className="a-card flex w-full scroll-mt-20 flex-col gap-4 p-4 lg:sticky lg:top-6 lg:w-[370px] lg:shrink-0">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-bold">Venta en curso</h2>
+              <button
+                type="button"
+                className="a-btn h-9 px-3 lg:hidden"
+                onClick={() => {
+                  searchRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  setTimeout(() => searchRef.current?.focus({ preventScroll: true }), 350)
+                }}
+              >
+                <Icon name="plus" size={14} /> Agregar otro
+              </button>
+            </div>
             {lines.length === 0 ? (
               <p className="text-sm text-muted">Todavía no has agregado productos.</p>
             ) : (
@@ -224,8 +279,12 @@ function Picker({ product: p, open, onToggle, onAdd, lines }: { product: Product
   const withTones = hasTones(p)
   const left = (v: Variant) => v.stock - (lines.find((l) => l.variant_id === v.id)?.qty ?? 0)
   const single = !withTones ? p.variants[0] : undefined
+  const boxRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (open) setTimeout(() => boxRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 30)
+  }, [open])
   return (
-    <div className="a-card overflow-hidden">
+    <div ref={boxRef} className="a-card scroll-mb-40 overflow-hidden">
       <div className="flex items-center gap-3 p-2.5">
         <ProductImage src={p.image_url} alt="" className="h-12 w-12 shrink-0 rounded-lg" />
         <div className="min-w-0 flex-1">

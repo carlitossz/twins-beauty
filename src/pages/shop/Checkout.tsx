@@ -5,10 +5,17 @@ import { BackButton, Icon, PaymentDetailsBox, Spinner, ToneDot } from '../../com
 import { api } from '../../lib/api'
 import { amountIn, convert, errorMessage, hoursText, money, usd } from '../../lib/format'
 import { useCart, useSettings } from '../../lib/store'
-import type { Delivery } from '../../lib/types'
+import type { Currency, Delivery } from '../../lib/types'
 import { orderMessage } from '../../lib/whatsapp'
 
 export const LAST_ORDER_KEY = 'twins-last-order'
+
+/** El monto como se escribe en la app del banco: sin símbolo, con coma decimal en Bs. null si no hay tasa cargada */
+export function bankAmount(currency: Currency, t: { usd: number; bs: number | null; cop: number | null }) {
+  if (currency === 'BS') return t.bs != null ? t.bs.toFixed(2).replace('.', ',') : null
+  if (currency === 'COP') return t.cop != null ? String(Math.round(t.cop)) : null
+  return t.usd.toFixed(2)
+}
 const CUSTOMER_KEY = 'twins-customer'
 
 interface SavedCustomer {
@@ -116,6 +123,7 @@ export default function Checkout() {
         total: money(result.currency, { usd: result.total_usd, bs: result.total_bs, cop: result.total_cop }),
         saving: result.wholesale ? usd(result.retail_usd - result.total_usd) : null,
         payment: selected.name,
+        paymentAmount: bankAmount(result.currency, { usd: result.total_usd, bs: result.total_bs, cop: result.total_cop }),
         paymentCash: selected.cash,
         customerName: name.trim(),
         reserveHours: settings?.reserve_hours ?? 0
@@ -284,7 +292,7 @@ export default function Checkout() {
                   )}
                 </div>
               ) : (
-                <PaymentDetailsBox note={selected.note} fields={selected.fields} cash={selected.cash} />
+                <PaymentDetailsBox name={selected.name} note={selected.note} fields={selected.fields} cash={selected.cash} amount={bankAmount(selected.currency, totals)} />
               )}
             </div>
           )}

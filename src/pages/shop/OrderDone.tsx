@@ -11,6 +11,7 @@ interface Done {
   total: string
   saving: string | null
   payment: string
+  paymentAmount?: string | null
   paymentCash: boolean
   customerName: string
   reserveHours?: number
@@ -72,7 +73,7 @@ export default function OrderDone() {
               <a href={waLink(settings?.whatsapp ?? '', done.message)} target="_blank" rel="noreferrer" className="btn-primary w-full">
                 <Icon name="wa" size={22} /> Enviar pedido por WhatsApp
               </a>
-              {method && !method.cash && <PaymentDetailsBox note={method.note} fields={method.fields} cash={false} />}
+              {method && !method.cash && <PaymentDetailsBox name={method.name} note={method.note} fields={method.fields} cash={false} amount={done.paymentAmount} />}
               <details className="rounded-[20px] bg-white p-4 text-sm">
                 <summary className="cursor-pointer font-semibold">Ver el mensaje</summary>
                 <pre className="mt-3 whitespace-pre-wrap font-sans text-[13px] leading-relaxed">{done.message}</pre>

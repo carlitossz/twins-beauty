@@ -203,11 +203,30 @@ export function ToneDot({ hex, size = 12, className = '' }: { hex: string; size?
   return <span aria-hidden="true" className={`inline-block shrink-0 rounded-full shadow-[inset_0_0_0_1px_rgba(109,82,71,0.28)] ${className}`} style={{ width: size, height: size, background: hex || '#EAD9CC' }} />
 }
 
-/** Datos de un método de pago: nota + renglones, cada uno con botón de copiar solo si corresponde */
-export function PaymentDetailsBox({ note, fields, cash }: { note: string; fields: { label: string; value: string; copyable: boolean }[]; cash: boolean }) {
+/**
+ * Datos de un método de pago: nota + renglones, cada uno con botón de copiar solo si corresponde.
+ * Con 2 datos o más sale además "Copiar todos los datos": copia un bloque con todo (y el monto, si se conoce)
+ * para pegarlo de una vez en la app del banco o mandárselo a quien va a pagar.
+ */
+export function PaymentDetailsBox({
+  name,
+  note,
+  fields,
+  cash,
+  amount
+}: {
+  name?: string
+  note: string
+  fields: { label: string; value: string; copyable: boolean }[]
+  cash: boolean
+  /** Monto a pagar ya en la moneda del método, sin símbolo (ej. "1234,56") */
+  amount?: string | null
+}) {
   const [copiedIdx, setCopiedIdx] = useState<number | null>(null)
   const shown = fields.filter((f) => f.value.trim())
   if (!note && shown.length === 0) return null
+
+  const allText = [name, ...shown.map((f) => (f.label ? `${f.label}: ${f.value.trim()}` : f.value.trim())), ...(amount ? [`Monto: ${amount}`] : [])].filter(Boolean).join('\n')
 
   async function copy(value: string, i: number) {
     try {
@@ -223,6 +242,16 @@ export function PaymentDetailsBox({ note, fields, cash }: { note: string; fields
     <div className="flex flex-col gap-2.5 rounded-[20px] bg-white p-4">
       <span className="text-[11px] font-bold uppercase tracking-[0.08em]">Datos para pagar</span>
       {note && <p className="text-[13px] text-muted">{note}</p>}
+      {shown.length >= 2 && (
+        <button
+          type="button"
+          onClick={() => copy(allText, -1)}
+          className={`flex h-12 items-center justify-center gap-2 rounded-full text-sm font-semibold transition ${copiedIdx === -1 ? 'bg-blush text-cocoa' : 'bg-cocoa text-cream'}`}
+        >
+          <Icon name={copiedIdx === -1 ? 'check' : 'copy'} size={17} />
+          {copiedIdx === -1 ? '¡Datos copiados! Pégalos en tu banco' : amount ? 'Copiar todos los datos y el monto' : 'Copiar todos los datos'}
+        </button>
+      )}
       {shown.map((f, i) => (
         <div key={i} className="flex items-center justify-between gap-3">
           <span className="flex min-w-0 flex-col">
