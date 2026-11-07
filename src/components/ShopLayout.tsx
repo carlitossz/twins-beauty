@@ -1,18 +1,21 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { usd } from '../lib/format'
 import { useCart, useSettings } from '../lib/store'
 import { waLink } from '../lib/whatsapp'
 import { DemoBanner, Icon, Logo } from './ui'
 
+/** Botón del carrito. En computadora muestra también el total */
 export function CartButton() {
-  const { count } = useCart()
+  const { count, pricing } = useCart()
   return (
     <Link
       to="/carrito"
       aria-label={count ? `Ver carrito, ${count} ${count === 1 ? 'producto' : 'productos'}` : 'Ver carrito'}
-      className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-cocoa text-cream"
+      className="relative flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full bg-cocoa text-cream lg:px-4"
     >
       <Icon name="bag" size={20} />
+      {count > 0 && <span className="hidden text-sm font-semibold lg:inline">{usd(pricing.total)}</span>}
       {count > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-blush px-1 text-[11px] font-bold text-cocoa">{count}</span>}
     </Link>
   )
@@ -27,7 +30,7 @@ export function WhatsAppFab({ raised = false }: { raised?: boolean }) {
       target="_blank"
       rel="noreferrer"
       aria-label="Escribir por WhatsApp"
-      className={`fixed right-4 z-20 grid h-14 w-14 place-items-center rounded-full border-[1.5px] border-cocoa bg-cream text-cocoa shadow-[0_8px_22px_rgba(109,82,71,0.25)] md:right-[max(1rem,calc(50%-15rem))] ${
+      className={`fixed right-4 z-20 grid h-14 w-14 place-items-center rounded-full border-[1.5px] border-cocoa bg-cream text-cocoa shadow-[0_8px_22px_rgba(109,82,71,0.25)] lg:bottom-8 lg:right-8 ${
         raised ? 'bottom-24' : 'bottom-5'
       }`}
     >
@@ -36,23 +39,39 @@ export function WhatsAppFab({ raised = false }: { raised?: boolean }) {
   )
 }
 
-/** Contenedor de la tienda: ancho de teléfono, centrado en pantallas grandes */
-export function ShopShell({ children, header = true }: { children: ReactNode; header?: boolean }) {
+/**
+ * Contenedor de la tienda.
+ * Teléfono: una columna del ancho de la pantalla. Computadora (lg): página ancha, centrada, con su propia cabecera.
+ * Las pantallas que no se adaptan a columnas (ej. la de "Gracias") usan narrow.
+ * header="desktop": la cabecera sale solo en computadora (en teléfono la pantalla trae sus propios botones).
+ */
+export function ShopShell({ children, header = true, narrow = false }: { children: ReactNode; header?: boolean | 'desktop'; narrow?: boolean }) {
+  const { settings } = useSettings()
   return (
     <div className="min-h-screen bg-cream">
       <DemoBanner />
-      <div className="mx-auto min-h-screen max-w-[34rem]">
-        {header && (
-          <header className="sticky top-0 z-10 flex items-center justify-between bg-cream/95 px-5 pb-3 pt-4 backdrop-blur">
-            <span className="w-11" aria-hidden="true" />
+      {header && (
+        <header className={`sticky top-0 z-10 bg-cream/95 backdrop-blur lg:border-b lg:border-line ${header === 'desktop' ? 'hidden lg:block' : ''}`}>
+          <div className={`mx-auto flex items-center justify-between px-5 pb-3 pt-4 lg:py-4 ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-6xl lg:px-8'}`}>
+            <span className="w-11 lg:hidden" aria-hidden="true" />
             <Link to="/" aria-label="Twins Beauty, inicio">
-              <Logo height={38} />
+              <Logo height={38} className="lg:h-[42px]" />
             </Link>
-            <CartButton />
-          </header>
-        )}
-        {children}
-      </div>
+            <div className="flex items-center gap-3">
+              <a
+                href={waLink(settings?.whatsapp ?? '', `Hola ${settings?.store_name ?? 'Twins Beauty'}, tengo una pregunta`)}
+                target="_blank"
+                rel="noreferrer"
+                className="hidden h-11 items-center gap-2 rounded-full border-[1.5px] border-cocoa px-4 text-sm font-semibold lg:flex"
+              >
+                <Icon name="wa" size={18} /> Escríbenos
+              </a>
+              <CartButton />
+            </div>
+          </div>
+        </header>
+      )}
+      <div className={`mx-auto min-h-screen ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-6xl lg:px-3'}`}>{children}</div>
     </div>
   )
 }

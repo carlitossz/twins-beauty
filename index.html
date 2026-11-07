@@ -28,8 +28,82 @@
     <meta name="twitter:title" content="Twins Beauty · Maquillaje 100% original" />
     <meta name="twitter:description" content="Elige tu tono, mira lo disponible y pide por WhatsApp." />
     <meta name="twitter:image" content="%SITE_URL%/og.jpg" />
+    <!-- Pantalla de carga: sale al instante, antes que la app, y se quita sola cuando la tienda está lista -->
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #faf2e2;
+        transition: opacity 0.35s ease, visibility 0.35s;
+      }
+      #splash.out {
+        opacity: 0;
+        visibility: hidden;
+      }
+      #splash .iso {
+        width: 108px;
+        height: 108px;
+        border-radius: 50%;
+        animation: splash-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      #splash .from {
+        position: absolute;
+        bottom: max(36px, env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        font: 500 12px/1 Poppins, system-ui, sans-serif;
+        color: #7d6056;
+        animation: splash-fade 0.6s 0.15s ease both;
+      }
+      #splash .from img {
+        height: 30px;
+        width: auto;
+      }
+      @keyframes splash-in {
+        from { opacity: 0; transform: scale(0.85); }
+        to { opacity: 1; transform: none; }
+      }
+      @keyframes splash-fade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #splash .iso, #splash .from { animation: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="splash" role="status" aria-label="Cargando Twins Beauty">
+      <img class="iso" src="%BASE_URL%logo/iso.png" alt="" />
+      <div class="from">
+        <img src="%BASE_URL%logo/wordmark-cocoa.png" alt="Twins Beauty" />
+      </div>
+    </div>
+    <script>
+      // Se muestra al menos un instante (para que no parpadee) y como mucho 4 s aunque algo tarde
+      ;(function () {
+        var start = Date.now()
+        var done = false
+        window.__hideSplash = function () {
+          if (done) return
+          done = true
+          setTimeout(function () {
+            var el = document.getElementById('splash')
+            if (!el) return
+            el.classList.add('out')
+            setTimeout(function () { el.remove() }, 400)
+          }, Math.max(0, 650 - (Date.now() - start)))
+        }
+        setTimeout(window.__hideSplash, 4000)
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

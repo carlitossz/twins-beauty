@@ -36,10 +36,12 @@ export default function CartPage() {
   const pct = Math.min(100, Math.round((pricing.eligibleUnits / Math.max(1, wholesaleMin)) * 100))
 
   return (
-    <ShopShell header={false}>
-      <header className="flex items-center gap-3 px-5 pb-2 pt-4">
+    <ShopShell header="desktop">
+      <header className="flex items-center gap-3 px-5 pb-2 pt-4 lg:pb-4 lg:pt-8">
+        <span className="lg:hidden">
         <BackButton to="/" label="Seguir comprando" />
-        <h1 className="text-[22px] font-bold">Tu carrito</h1>
+        </span>
+        <h1 className="text-[22px] font-bold lg:text-[32px]">Tu carrito</h1>
       </header>
 
       {cart.items.length === 0 ? (
@@ -52,8 +54,8 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <>
-          <main className="flex flex-col gap-3.5 px-5 pb-56 pt-2">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 lg:px-5">
+          <main className="flex flex-col gap-3.5 px-5 pb-56 pt-2 lg:px-0 lg:pb-16 lg:pt-0">
             {showProgress && (
               <div className="flex flex-col gap-2.5 rounded-[20px] bg-blush p-4">
                 <span className="text-[13px] font-semibold leading-snug">
@@ -121,8 +123,9 @@ export default function CartPage() {
             </Link>
           </main>
 
-          <div className="fixed inset-x-0 bottom-0 z-10">
-            <div className="mx-auto flex max-w-[34rem] flex-col gap-2.5 rounded-t-[28px] bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-8px_24px_rgba(109,82,71,0.10)]">
+          <div className="fixed inset-x-0 bottom-0 z-10 lg:sticky lg:bottom-auto lg:top-28 lg:z-auto">
+            <div className="mx-auto flex max-w-[34rem] flex-col gap-2.5 rounded-t-[28px] bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-8px_24px_rgba(109,82,71,0.10)] lg:max-w-none lg:rounded-[28px] lg:p-6 lg:shadow-none">
+              <h2 className="hidden text-lg font-bold lg:block">Resumen</h2>
               {pricing.wholesale && (
                 <>
                   <div className="flex justify-between text-sm">
@@ -148,7 +151,7 @@ export default function CartPage() {
               )}
             </div>
           </div>
-        </>
+        </div>
       )}
     </ShopShell>
   )

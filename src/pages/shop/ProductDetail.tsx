@@ -108,11 +108,21 @@ export default function ProductDetail() {
   const wholesaleMin = settings?.wholesale_min ?? 0
 
   return (
-    <ShopShell header={false}>
-      <div className="relative px-5 pt-4">
+    <ShopShell header="desktop">
+      <nav aria-label="Ruta" className="hidden items-center gap-2 px-5 pt-6 text-sm lg:flex">
+        <Link to="/" className="font-semibold underline-offset-4 hover:underline">
+          Catálogo
+        </Link>
+        <span aria-hidden="true">/</span>
+        <span>{p.category}</span>
+        <span aria-hidden="true">/</span>
+        <span className="font-semibold">{p.name}</span>
+      </nav>
+      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-12 lg:px-5 lg:pt-5">
+      <div className="relative px-5 pt-4 lg:sticky lg:top-28 lg:px-0 lg:pt-0">
         <div className="relative aspect-square overflow-hidden rounded-[28px] bg-white">
           <ProductImage src={mainImg} alt={showingSwatch ? `Carta de tonos de ${p.name}` : p.name} className="h-full w-full" fit={showingSwatch ? 'contain' : 'cover'} />
-          <div className="absolute left-3 right-3 top-3 flex justify-between">
+          <div className="absolute left-3 right-3 top-3 flex justify-between lg:hidden">
             <BackButton to="/" label="Volver al catálogo" />
             <CartButton />
           </div>
@@ -139,7 +149,7 @@ export default function ProductDetail() {
                     setActiveImg(i)
                     setToneView(false)
                   }}
-                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 bg-white ${on ? 'border-cocoa' : 'border-transparent'}`}
+                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 bg-white lg:h-20 lg:w-20 ${on ? 'border-cocoa' : 'border-transparent'}`}
                 >
                   <ProductImage src={src} alt="" className="h-full w-full" />
                   {isSwatch && <span className="absolute inset-x-0 bottom-0 bg-cocoa/85 py-0.5 text-center text-[9px] font-semibold text-cream">Tonos</span>}
@@ -150,10 +160,10 @@ export default function ProductDetail() {
         )}
       </div>
 
-      <main className="flex flex-col gap-5 px-5 pb-40 pt-5">
+      <main className="flex flex-col gap-5 px-5 pb-40 pt-5 lg:px-0 lg:pb-16 lg:pt-0">
         <section className="flex flex-col gap-1">
           <span className="text-[12.5px] font-medium">{p.brand} · Original</span>
-          <h1 className="text-[25px] font-bold leading-tight">{p.name}</h1>
+          <h1 className="text-[25px] font-bold leading-tight lg:text-[34px]">{p.name}</h1>
           {p.subtitle && <span className="text-[13px]">{p.subtitle}</span>}
           <span className="mt-2 text-[28px] font-bold">{usd(p.price)}</span>
         </section>
@@ -178,7 +188,7 @@ export default function ProductDetail() {
             {groups.map(([grp, list]) => (
               <div key={grp || '__'} className="flex flex-col gap-2">
                 {groups.length > 1 && <span className="text-[11px] font-semibold uppercase tracking-[0.06em]">{grp || 'Otros'}</span>}
-                <div role="radiogroup" aria-label={grp ? `Tonos ${grp}` : 'Tonos'} className="grid grid-cols-6 gap-x-2 gap-y-3">
+                <div role="radiogroup" aria-label={grp ? `Tonos ${grp}` : 'Tonos'} className="grid grid-cols-6 gap-x-2 gap-y-3 lg:grid-cols-8">
                   {list.map((v) => {
                     const on = v.id === variant?.id
                     return (
@@ -207,6 +217,46 @@ export default function ProductDetail() {
               Los colores en pantalla son referenciales.{p.swatch_url ? ' Toca "Tonos" en las fotos para ver la carta real.' : ''} ¿Dudas con tu tono? Escríbenos y te asesoramos.
             </p>
           </section>
+        )}
+
+        {!soldOut && (
+          <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-cream lg:static lg:z-auto lg:border-0 lg:bg-transparent">
+            <div className="mx-auto flex max-w-[34rem] flex-col gap-2 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 lg:mx-0 lg:max-w-none lg:px-0 lg:pb-0 lg:pt-0">
+              {added && (
+                <div role="status" className="animate-reveal flex items-center justify-between gap-3 rounded-2xl bg-blush px-4 py-2.5 text-[13px]">
+                  <span className="flex min-w-0 items-center gap-2 font-semibold">
+                    <Icon name="check" size={16} className="shrink-0" />
+                    <span className="truncate">Agregado: {added}</span>
+                  </span>
+                  <Link to="/carrito" className="shrink-0 font-bold underline">
+                    Ver carrito
+                  </Link>
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <div className="flex h-14 items-center rounded-full border-[1.5px] border-cocoa">
+                  <button type="button" aria-label="Quitar uno" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} className="grid h-full w-12 place-items-center disabled:opacity-30">
+                    <Icon name="minus" size={18} />
+                  </button>
+                  <span className="w-6 text-center text-base font-bold" aria-live="polite">
+                    {qty}
+                  </span>
+                  <button type="button" aria-label="Agregar uno" onClick={() => setQty((q) => Math.min(Math.max(1, available), q + 1))} disabled={qty >= available} className="grid h-full w-12 place-items-center disabled:opacity-30">
+                    <Icon name="plus" size={18} />
+                  </button>
+                </div>
+                {available > 0 ? (
+                  <button type="button" onClick={addToCart} className="btn-primary flex-1 px-4">
+                    Agregar · {usd(p.price * qty)}
+                  </button>
+                ) : (
+                  <Link to="/carrito" className="btn-primary flex-1 px-4 text-[14px]">
+                    Ya tienes todos en el carrito
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
         {soldOut && (
@@ -247,46 +297,7 @@ export default function ProductDetail() {
           </ul>
         )}
       </main>
-
-      {!soldOut && (
-        <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-cream">
-          <div className="mx-auto flex max-w-[34rem] flex-col gap-2 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
-            {added && (
-              <div role="status" className="animate-reveal flex items-center justify-between gap-3 rounded-2xl bg-blush px-4 py-2.5 text-[13px]">
-                <span className="flex min-w-0 items-center gap-2 font-semibold">
-                  <Icon name="check" size={16} className="shrink-0" />
-                  <span className="truncate">Agregado: {added}</span>
-                </span>
-                <Link to="/carrito" className="shrink-0 font-bold underline">
-                  Ver carrito
-                </Link>
-              </div>
-            )}
-            <div className="flex items-center gap-3">
-              <div className="flex h-14 items-center rounded-full border-[1.5px] border-cocoa">
-                <button type="button" aria-label="Quitar uno" onClick={() => setQty((q) => Math.max(1, q - 1))} disabled={qty <= 1} className="grid h-full w-12 place-items-center disabled:opacity-30">
-                  <Icon name="minus" size={18} />
-                </button>
-                <span className="w-6 text-center text-base font-bold" aria-live="polite">
-                  {qty}
-                </span>
-                <button type="button" aria-label="Agregar uno" onClick={() => setQty((q) => Math.min(Math.max(1, available), q + 1))} disabled={qty >= available} className="grid h-full w-12 place-items-center disabled:opacity-30">
-                  <Icon name="plus" size={18} />
-                </button>
-              </div>
-              {available > 0 ? (
-                <button type="button" onClick={addToCart} className="btn-primary flex-1 px-4">
-                  Agregar · {usd(p.price * qty)}
-                </button>
-              ) : (
-                <Link to="/carrito" className="btn-primary flex-1 px-4 text-[14px]">
-                  Ya tienes todos en el carrito
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </ShopShell>
   )
 }

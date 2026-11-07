@@ -3,6 +3,11 @@ import { api } from './api'
 import { priceCart, type CartPricing } from './pricing'
 import type { Settings } from './types'
 
+/** Quita la pantalla de carga del logo (index.html) */
+export function hideSplash() {
+  ;(window as unknown as { __hideSplash?: () => void }).__hideSplash?.()
+}
+
 // ---------- Ajustes de la tienda ----------
 interface SettingsCtx {
   settings: Settings | null
@@ -18,6 +23,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       setSettings(await api.getSettings())
     } catch {
       /* se reintenta en la próxima carga */
+    } finally {
+      hideSplash()
     }
   }, [])
   useEffect(() => {
