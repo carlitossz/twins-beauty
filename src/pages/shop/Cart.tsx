@@ -38,7 +38,7 @@ export default function CartPage() {
   return (
     <ShopShell header="desktop">
       <header className="flex items-center gap-3 px-5 pb-2 pt-4 lg:pb-4 lg:pt-8">
-        <span className="lg:hidden">
+        <span>
         <BackButton to="/" label="Seguir comprando" />
         </span>
         <h1 className="text-[22px] font-bold lg:text-[32px]">Tu carrito</h1>
@@ -54,7 +54,7 @@ export default function CartPage() {
           </Link>
         </div>
       ) : (
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 lg:px-5">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px] lg:items-start lg:gap-10 lg:px-5">
           <main className="flex flex-col gap-3.5 px-5 pb-56 pt-2 lg:px-0 lg:pb-16 lg:pt-0">
             {showProgress && (
               <div className="flex flex-col gap-2.5 rounded-[20px] bg-blush p-4">

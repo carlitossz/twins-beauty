@@ -90,7 +90,7 @@ export default function Catalog() {
           <Hero hero={hero} featured={featured} />
         </div>
 
-        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
+        <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-10 2xl:gap-14">
           {/* Computadora: buscador y categorías a un lado */}
           <aside className="hidden lg:sticky lg:top-28 lg:flex lg:flex-col lg:gap-5">
             {search}
@@ -144,7 +144,7 @@ export default function Catalog() {
                     <span className="text-muted">Escríbenos por WhatsApp y te ayudamos a buscarlo.</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-x-3.5 gap-y-5 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-8 xl:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-x-3.5 gap-y-5 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-9 xl:grid-cols-4 2xl:grid-cols-5">
                     {shown.map((p) => (
                       <ProductCard key={p.id} product={p} />
                     ))}
@@ -180,19 +180,19 @@ function Hero({ hero, featured }: { hero: Product | undefined; featured: Product
     <section className={`relative flex overflow-hidden rounded-[24px] bg-blush p-5 ${wide ? 'min-h-[260px] items-center gap-8 px-10 py-10' : 'min-h-[188px]'}`}>
       <Star size={wide ? 220 : 130} className={`animate-spin-slow absolute ${wide ? '-right-16 -top-20' : '-right-8 -top-8'}`} />
       <Star size={wide ? 80 : 54} color="#AC8A81" className={`absolute ${wide ? 'bottom-[-22px] left-[42%]' : 'bottom-[-14px] right-[118px]'}`} />
-      <div className={`relative z-[1] flex flex-col gap-2 ${wide ? 'max-w-[380px] shrink-0' : 'max-w-[60%]'}`}>
+      <div className={`relative z-[1] flex flex-col gap-2 ${wide ? 'max-w-[440px] shrink-0' : 'max-w-[60%]'}`}>
         <p className="text-[11px] font-semibold uppercase tracking-[0.1em]">Maquillaje 100% original</p>
-        <h1 className={`font-bold leading-[1.12] ${wide ? 'text-[40px]' : 'text-[25px]'}`}>Tu glow favorito, a un toque</h1>
+        <h1 className={`font-bold leading-[1.12] ${wide ? 'text-[40px] 2xl:text-[46px]' : 'text-[25px]'}`}>Tu glow favorito, a un toque</h1>
         <p className={`leading-snug ${wide ? 'text-[15px]' : 'text-[12.5px]'}`}>Envíos a toda Venezuela · Delivery y entregas en la ciudad</p>
       </div>
       {wide ? (
         <div className="relative z-[1] ml-auto flex gap-4">
-          {featured.slice(0, 3).map((p, i) => (
+          {featured.slice(0, 4).map((p, i) => (
             <Link
               key={p.id}
               to={`/producto/${p.id}`}
               aria-label={`Ver ${p.name}`}
-              className={`animate-hero-in h-[150px] w-[150px] overflow-hidden rounded-[22px] bg-white shadow-[0_10px_24px_rgba(109,82,71,0.18)] transition hover:-translate-y-1 xl:h-[170px] xl:w-[170px]`}
+              className={`animate-hero-in h-[150px] w-[150px] overflow-hidden rounded-[22px] bg-white shadow-[0_10px_24px_rgba(109,82,71,0.18)] transition hover:-translate-y-1 xl:h-[170px] xl:w-[170px] 2xl:h-[200px] 2xl:w-[200px] ${i === 3 ? 'hidden 2xl:block' : ''}`}
               style={{ animationDelay: `${i * 80}ms` }}
             >
               <ProductImage src={p.image_url} alt={p.name} className="h-full w-full" />

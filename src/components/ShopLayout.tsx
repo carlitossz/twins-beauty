@@ -30,7 +30,7 @@ export function WhatsAppFab({ raised = false }: { raised?: boolean }) {
       target="_blank"
       rel="noreferrer"
       aria-label="Escribir por WhatsApp"
-      className={`fixed right-4 z-20 grid h-14 w-14 place-items-center rounded-full border-[1.5px] border-cocoa bg-cream text-cocoa shadow-[0_8px_22px_rgba(109,82,71,0.25)] lg:bottom-8 lg:right-8 ${
+      className={`fixed right-4 z-20 grid h-14 w-14 place-items-center rounded-full border-[1.5px] border-cocoa bg-cream text-cocoa shadow-[0_8px_22px_rgba(109,82,71,0.25)] lg:hidden ${
         raised ? 'bottom-24' : 'bottom-5'
       }`}
     >
@@ -52,7 +52,7 @@ export function ShopShell({ children, header = true, narrow = false }: { childre
       <DemoBanner />
       {header && (
         <header className={`sticky top-0 z-10 bg-cream/95 backdrop-blur lg:border-b lg:border-line ${header === 'desktop' ? 'hidden lg:block' : ''}`}>
-          <div className={`mx-auto flex items-center justify-between px-5 pb-3 pt-4 lg:py-4 ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-6xl lg:px-8'}`}>
+          <div className={`mx-auto flex items-center justify-between px-5 pb-3 pt-4 lg:py-4 ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-[1560px] lg:px-10'}`}>
             <span className="w-11 lg:hidden" aria-hidden="true" />
             <Link to="/" aria-label="Twins Beauty, inicio">
               <Logo height={38} className="lg:h-[42px]" />
@@ -71,7 +71,7 @@ export function ShopShell({ children, header = true, narrow = false }: { childre
           </div>
         </header>
       )}
-      <div className={`mx-auto min-h-screen ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-6xl lg:px-3'}`}>{children}</div>
+      <div className={`mx-auto min-h-screen ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-[1560px] lg:px-5'}`}>{children}</div>
     </div>
   )
 }

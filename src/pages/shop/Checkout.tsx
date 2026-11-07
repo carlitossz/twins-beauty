@@ -145,13 +145,13 @@ export default function Checkout() {
   return (
     <ShopShell header="desktop">
       <header className="flex items-center gap-3 px-5 pb-2 pt-4 lg:pb-4 lg:pt-8">
-        <span className="lg:hidden">
+        <span>
         <BackButton to="/carrito" label="Volver al carrito" />
         </span>
         <h1 className="text-[22px] font-bold lg:text-[32px]">Finalizar pedido</h1>
       </header>
 
-      <form onSubmit={submit} className="flex flex-col gap-7 px-5 pb-48 pt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-10 lg:pb-16" noValidate>
+      <form onSubmit={submit} className="flex flex-col gap-7 px-5 pb-48 pt-2 lg:grid lg:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px] lg:items-start lg:gap-10 lg:pb-16" noValidate>
         {/* Resumen: arriba en teléfono (con el botón fijo abajo); a la derecha y fijo en computadora */}
         <aside className="flex flex-col gap-4 lg:sticky lg:top-28 lg:order-2">
           <section className="rounded-[20px] bg-white px-4 py-1 lg:px-6 lg:py-3">

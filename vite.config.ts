@@ -43,11 +43,21 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        navigateFallbackDenylist: [/^\/admin/],
-        globPatterns: ['**/*.{js,css,html,png,svg,webp,woff2}'],
+        // Las páginas (el index.html) se buscan primero en internet: así, al recargar, siempre sale la
+        // versión más nueva publicada. La copia guardada solo se usa si no hay conexión.
+        navigateFallback: null,
+        globPatterns: ['**/*.{js,css,png,svg,webp,woff2}'],
+        skipWaiting: true,
+        clientsClaim: true,
+        cleanupOutdatedCaches: true,
         // Las cartas de tonos pesan más: se guardan solo cuando alguien las abre
         globIgnores: ['**/tonos/**'],
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) => request.mode === 'navigate',
+            handler: 'NetworkFirst',
+            options: { cacheName: 'paginas', networkTimeoutSeconds: 4, expiration: { maxEntries: 20 } }
+          },
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/tonos/'),
             handler: 'CacheFirst',

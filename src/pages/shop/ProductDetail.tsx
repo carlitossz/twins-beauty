@@ -109,7 +109,10 @@ export default function ProductDetail() {
 
   return (
     <ShopShell header="desktop">
-      <nav aria-label="Ruta" className="hidden items-center gap-2 px-5 pt-6 text-sm lg:flex">
+      <nav aria-label="Ruta" className="hidden items-center gap-3 px-5 pt-6 text-sm lg:flex">
+        <Link to="/" className="mr-2 flex h-11 items-center gap-2 rounded-full border-[1.5px] border-cocoa pl-3 pr-4 font-semibold transition hover:bg-white">
+          <Icon name="back" size={18} /> Volver al catálogo
+        </Link>
         <Link to="/" className="font-semibold underline-offset-4 hover:underline">
           Catálogo
         </Link>
@@ -118,7 +121,7 @@ export default function ProductDetail() {
         <span aria-hidden="true">/</span>
         <span className="font-semibold">{p.name}</span>
       </nav>
-      <div className="lg:grid lg:grid-cols-2 lg:items-start lg:gap-12 lg:px-5 lg:pt-5">
+      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-12 lg:px-5 lg:pt-6 2xl:grid-cols-[minmax(0,680px)_minmax(0,1fr)] 2xl:gap-16">
       <div className="relative px-5 pt-4 lg:sticky lg:top-28 lg:px-0 lg:pt-0">
         <div className="relative aspect-square overflow-hidden rounded-[28px] bg-white">
           <ProductImage src={mainImg} alt={showingSwatch ? `Carta de tonos de ${p.name}` : p.name} className="h-full w-full" fit={showingSwatch ? 'contain' : 'cover'} />
@@ -188,7 +191,7 @@ export default function ProductDetail() {
             {groups.map(([grp, list]) => (
               <div key={grp || '__'} className="flex flex-col gap-2">
                 {groups.length > 1 && <span className="text-[11px] font-semibold uppercase tracking-[0.06em]">{grp || 'Otros'}</span>}
-                <div role="radiogroup" aria-label={grp ? `Tonos ${grp}` : 'Tonos'} className="grid grid-cols-6 gap-x-2 gap-y-3 lg:grid-cols-8">
+                <div role="radiogroup" aria-label={grp ? `Tonos ${grp}` : 'Tonos'} className="grid grid-cols-6 gap-x-2 gap-y-3 lg:grid-cols-8 2xl:grid-cols-10">
                   {list.map((v) => {
                     const on = v.id === variant?.id
                     return (
