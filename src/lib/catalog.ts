@@ -123,7 +123,10 @@ export const CATALOG: CatalogProduct[] = [
           ['Red Delicious', '#E0283A'],
           ['Money Mauve', '#9B6866'],
           ['Pink Quartz', '#F5A3A0'],
-          ['Rose Envy', '#C9495A']
+          ['Rose Envy', '#C9495A'],
+          ['Piggy Bank', '#F2A7B5'],
+          ['Papayarazzi', '#F5875A'],
+          ['Bubble Burst', '#F49AC1']
         ],
         'Clásicos'
       ),
@@ -184,7 +187,8 @@ export const CATALOG: CatalogProduct[] = [
       ['Cotton Candy Crush', '#E3A0D6'],
       ['Pink Lemonade', '#F59DB5'],
       ['Vanilla Toffee', '#B98258'],
-      ['Blackberry Sorbet', '#6A3448']
+      ['Blackberry Sorbet', '#6A3448'],
+      ['Strawberry Shortcake', '#F07C7C']
     ])
   },
   {
@@ -195,7 +199,17 @@ export const CATALOG: CatalogProduct[] = [
     category: 'Labios',
     price: 7,
     wholesale: 5,
-    image: img('lip-oil-stick')
+    image: img('lip-oil-stick'),
+    description: 'Labial en barra con aceite, color y brillo.',
+    tones: tones([
+      ['Rose Latte', '#C98B85'],
+      ['Caramelt', '#B4775A'],
+      ['Truffle', '#7A4A3E'],
+      ['Jam Packed', '#7A1E3A'],
+      ['Mauve Mentality', '#A0626C'],
+      ['Pink Me Energy', '#E2588A'],
+      ['Cherry On Top', '#B2213A']
+    ])
   },
   {
     slug: 'corrector-soft-glam',
@@ -230,7 +244,7 @@ export const CATALOG: CatalogProduct[] = [
     swatch: chart('corrector-camo-hidratante'),
     tones: [
       ...skin(['Fair Rose', 'Fair Warm', 'Fair Beige', 'Light Sand', 'Light Peach', 'Light Beige'], 'Claros'),
-      ...skin(['Medium Peach', 'Medium Sand', 'Medium Beige', 'Tan Sand', 'Tan Walnut', 'Tan Latte'], 'Medios'),
+      ...skin(['Medium Peach', 'Medium Sand', 'Medium Beige', 'Medium Warm', 'Tan Sand', 'Tan Walnut', 'Tan Latte'], 'Medios'),
       ...skin(['Deep Olive', 'Deep Chestnut', 'Deep Cinnamon', 'Rich Chocolate', 'Rich Cocoa', 'Rich Ebony'], 'Oscuros')
     ]
   },
@@ -393,19 +407,18 @@ export const CATALOG: CatalogProduct[] = [
     tones: tones([['Neutral Brown', '#5E4433']])
   },
   {
-    // Precio pendiente: entra oculto hasta que se le ponga precio desde el panel
     slug: 'lapiz-cejas-individual',
     name: 'Lápiz de cejas',
     subtitle: 'Instant Lift Brow Pencil · individual',
     brand: 'e.l.f.',
     category: 'Ojos y cejas',
-    price: 0,
+    price: 3,
     wholesale: null,
     image: img('lapiz-cejas-individual'),
     description: 'Lápiz retráctil con cepillo, por unidad.',
     swatch: chart('lapiz-cejas'),
-    hidden: true,
     tones: tones([
+      ['Blond', '#A88B6A'],
       ['Taupe', '#8A7262'],
       ['Deep Brown', '#3E2A20']
     ])
@@ -466,6 +479,17 @@ export const CATALOG: CatalogProduct[] = [
     price: 8,
     wholesale: null,
     image: img('brocha-base')
+  },
+  {
+    slug: 'brocha-ultimate-blending',
+    name: 'Brocha Ultimate Blending',
+    subtitle: 'Ultimate Blending Brush',
+    brand: 'e.l.f.',
+    category: 'Brochas',
+    price: 8,
+    wholesale: null,
+    image: img('brocha-ultimate-blending'),
+    description: 'Brocha densa y redondeada para difuminar base, polvo o rubor.'
   },
   {
     slug: 'set-brochas-full-face',

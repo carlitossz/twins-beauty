@@ -40,14 +40,17 @@ begin
     (pid, 'Money Mauve', '#9B6866', null, 'Clásicos', 6, 0),
     (pid, 'Pink Quartz', '#F5A3A0', null, 'Clásicos', 7, 0),
     (pid, 'Rose Envy', '#C9495A', null, 'Clásicos', 8, 0),
-    (pid, 'Opal-ogy Tour', '#D9D6EE', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 9, 0),
-    (pid, 'Citrine Gleam', '#E2C368', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 10, 0),
-    (pid, 'Crystal Baller', '#D7B79A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 11, 0),
-    (pid, 'Candy Coded', '#F0B2A8', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 12, 0),
-    (pid, 'Super-Neutral', '#D9844A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 13, 0),
-    (pid, 'Princess Cut', '#E58C86', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 14, 0),
-    (pid, 'Divine Wine', '#B5506A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 15, 0),
-    (pid, 'Chocoluxe', '#B3743F', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 16, 0);
+    (pid, 'Piggy Bank', '#F2A7B5', null, 'Clásicos', 9, 0),
+    (pid, 'Papayarazzi', '#F5875A', null, 'Clásicos', 10, 0),
+    (pid, 'Bubble Burst', '#F49AC1', null, 'Clásicos', 11, 0),
+    (pid, 'Opal-ogy Tour', '#D9D6EE', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 12, 0),
+    (pid, 'Citrine Gleam', '#E2C368', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 13, 0),
+    (pid, 'Crystal Baller', '#D7B79A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 14, 0),
+    (pid, 'Candy Coded', '#F0B2A8', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 15, 0),
+    (pid, 'Super-Neutral', '#D9844A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 16, 0),
+    (pid, 'Princess Cut', '#E58C86', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 17, 0),
+    (pid, 'Divine Wine', '#B5506A', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 18, 0),
+    (pid, 'Chocoluxe', '#B3743F', '/tonos/gloss-glow-reviver-brillo.webp', 'Con brillo', 19, 0);
 
   -- Tinta labios y mejillas
   insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Tinta labios y mejillas', 'Lip & Cheek Tint', 'e.l.f.', 'Labios', '', 'Tinta ligera para labios y mejillas.', 9, 7, '/productos/tinta-labios-mejillas.webp', '["/productos/tinta-labios-mejillas.webp"]'::jsonb, '/tonos/tinta-labios-mejillas.webp', 2, true) returning id into pid;
@@ -72,11 +75,19 @@ begin
     (pid, 'Cotton Candy Crush', '#E3A0D6', null, '', 8, 0),
     (pid, 'Pink Lemonade', '#F59DB5', null, '', 9, 0),
     (pid, 'Vanilla Toffee', '#B98258', null, '', 10, 0),
-    (pid, 'Blackberry Sorbet', '#6A3448', null, '', 11, 0);
+    (pid, 'Blackberry Sorbet', '#6A3448', null, '', 11, 0),
+    (pid, 'Strawberry Shortcake', '#F07C7C', null, '', 12, 0);
 
   -- Lip Oil Stick
-  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Lip Oil Stick', 'Glow Reviver Lip Oil Stick', 'e.l.f.', 'Labios', '', '', 7, 5, '/productos/lip-oil-stick.webp', '["/productos/lip-oil-stick.webp"]'::jsonb, null, 4, true) returning id into pid;
-  insert into public.variants (product_id, name, stock) values (pid, '', 0);
+  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Lip Oil Stick', 'Glow Reviver Lip Oil Stick', 'e.l.f.', 'Labios', '', 'Labial en barra con aceite, color y brillo.', 7, 5, '/productos/lip-oil-stick.webp', '["/productos/lip-oil-stick.webp"]'::jsonb, null, 4, true) returning id into pid;
+  insert into public.variants (product_id, name, hex, image_url, grp, sort, stock) values
+    (pid, 'Rose Latte', '#C98B85', null, '', 0, 0),
+    (pid, 'Caramelt', '#B4775A', null, '', 1, 0),
+    (pid, 'Truffle', '#7A4A3E', null, '', 2, 0),
+    (pid, 'Jam Packed', '#7A1E3A', null, '', 3, 0),
+    (pid, 'Mauve Mentality', '#A0626C', null, '', 4, 0),
+    (pid, 'Pink Me Energy', '#E2588A', null, '', 5, 0),
+    (pid, 'Cherry On Top', '#B2213A', null, '', 6, 0);
 
   -- Corrector Soft Glam
   insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Corrector Soft Glam', 'Soft Glam Satin Concealer', 'e.l.f.', 'Rostro', '', 'Corrector de cobertura media construible y acabado satinado.', 6, 4, '/productos/corrector-soft-glam.webp', '["/productos/corrector-soft-glam.webp"]'::jsonb, '/tonos/corrector-soft-glam.webp', 5, true) returning id into pid;
@@ -130,15 +141,16 @@ begin
     (pid, 'Medium Peach', '#DAA279', null, 'Medios', 6, 0),
     (pid, 'Medium Sand', '#D4A777', null, 'Medios', 7, 0),
     (pid, 'Medium Beige', '#D4A47B', null, 'Medios', 8, 0),
-    (pid, 'Tan Sand', '#BE8A55', null, 'Medios', 9, 0),
-    (pid, 'Tan Walnut', '#B47B55', null, 'Medios', 10, 0),
-    (pid, 'Tan Latte', '#BA8357', null, 'Medios', 11, 0),
-    (pid, 'Deep Olive', '#926634', null, 'Oscuros', 12, 0),
-    (pid, 'Deep Chestnut', '#8E5834', null, 'Oscuros', 13, 0),
-    (pid, 'Deep Cinnamon', '#96562E', null, 'Oscuros', 14, 0),
-    (pid, 'Rich Chocolate', '#5E3826', null, 'Oscuros', 15, 0),
-    (pid, 'Rich Cocoa', '#623828', null, 'Oscuros', 16, 0),
-    (pid, 'Rich Ebony', '#4A2C20', null, 'Oscuros', 17, 0);
+    (pid, 'Medium Warm', '#D6A873', null, 'Medios', 9, 0),
+    (pid, 'Tan Sand', '#BE8A55', null, 'Medios', 10, 0),
+    (pid, 'Tan Walnut', '#B47B55', null, 'Medios', 11, 0),
+    (pid, 'Tan Latte', '#BA8357', null, 'Medios', 12, 0),
+    (pid, 'Deep Olive', '#926634', null, 'Oscuros', 13, 0),
+    (pid, 'Deep Chestnut', '#8E5834', null, 'Oscuros', 14, 0),
+    (pid, 'Deep Cinnamon', '#96562E', null, 'Oscuros', 15, 0),
+    (pid, 'Rich Chocolate', '#5E3826', null, 'Oscuros', 16, 0),
+    (pid, 'Rich Cocoa', '#623828', null, 'Oscuros', 17, 0),
+    (pid, 'Rich Ebony', '#4A2C20', null, 'Oscuros', 18, 0);
 
   -- Corrector Camo tapa negra
   insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Corrector Camo tapa negra', '16HR Camo Concealer · acabado mate', 'e.l.f.', 'Rostro', '', 'Corrector de alta cobertura y larga duración, acabado mate.', 10, 8, '/productos/corrector-camo-16h.webp', '["/productos/corrector-camo-16h.webp"]'::jsonb, null, 7, true) returning id into pid;
@@ -233,10 +245,11 @@ begin
     (pid, 'Neutral Brown', '#5E4433', null, '', 0, 0);
 
   -- Lápiz de cejas
-  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Lápiz de cejas', 'Instant Lift Brow Pencil · individual', 'e.l.f.', 'Ojos y cejas', '', 'Lápiz retráctil con cepillo, por unidad.', 0, null, '/productos/lapiz-cejas-individual.webp', '["/productos/lapiz-cejas-individual.webp"]'::jsonb, '/tonos/lapiz-cejas.webp', 17, false) returning id into pid;
+  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Lápiz de cejas', 'Instant Lift Brow Pencil · individual', 'e.l.f.', 'Ojos y cejas', '', 'Lápiz retráctil con cepillo, por unidad.', 3, null, '/productos/lapiz-cejas-individual.webp', '["/productos/lapiz-cejas-individual.webp"]'::jsonb, '/tonos/lapiz-cejas.webp', 17, true) returning id into pid;
   insert into public.variants (product_id, name, hex, image_url, grp, sort, stock) values
-    (pid, 'Taupe', '#8A7262', null, '', 0, 0),
-    (pid, 'Deep Brown', '#3E2A20', null, '', 1, 0);
+    (pid, 'Blond', '#A88B6A', null, '', 0, 0),
+    (pid, 'Taupe', '#8A7262', null, '', 1, 0),
+    (pid, 'Deep Brown', '#3E2A20', null, '', 2, 0);
 
   -- Delineador plumón negro
   insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Delineador plumón negro', 'Eyeliner Pen', 'e.l.f.', 'Ojos y cejas', '', 'Delineador líquido tipo plumón, punta fina.', 8, null, '/productos/delineador-plumon.webp', '["/productos/delineador-plumon.webp"]'::jsonb, null, 18, true) returning id into pid;
@@ -260,12 +273,16 @@ begin
   insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Brocha para base', 'Buffing Foundation Brush', 'e.l.f.', 'Brochas', '', '', 8, null, '/productos/brocha-base.webp', '["/productos/brocha-base.webp"]'::jsonb, null, 22, true) returning id into pid;
   insert into public.variants (product_id, name, stock) values (pid, '', 0);
 
+  -- Brocha Ultimate Blending
+  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Brocha Ultimate Blending', 'Ultimate Blending Brush', 'e.l.f.', 'Brochas', '', 'Brocha densa y redondeada para difuminar base, polvo o rubor.', 8, null, '/productos/brocha-ultimate-blending.webp', '["/productos/brocha-ultimate-blending.webp"]'::jsonb, null, 23, true) returning id into pid;
+  insert into public.variants (product_id, name, stock) values (pid, '', 0);
+
   -- Set de brochas Full Face
-  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Set de brochas Full Face', 'Flawless Face & Eye Brush Set', 'e.l.f.', 'Brochas', '', '', 25, null, '/productos/set-brochas-full-face.webp', '["/productos/set-brochas-full-face.webp"]'::jsonb, null, 23, true) returning id into pid;
+  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Set de brochas Full Face', 'Flawless Face & Eye Brush Set', 'e.l.f.', 'Brochas', '', '', 25, null, '/productos/set-brochas-full-face.webp', '["/productos/set-brochas-full-face.webp"]'::jsonb, null, 24, true) returning id into pid;
   insert into public.variants (product_id, name, stock) values (pid, '', 0);
 
   -- Crema hidratante Toleriane
-  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Crema hidratante Toleriane', 'Toleriane Double Repair Face Moisturizer', 'La Roche-Posay', 'Skincare', '', '', 20, null, '/productos/crema-toleriane.webp', '["/productos/crema-toleriane.webp"]'::jsonb, null, 24, true) returning id into pid;
+  insert into public.products (name, subtitle, brand, category, badge, description, price, price_wholesale, image_url, images, swatch_url, sort, active) values ('Crema hidratante Toleriane', 'Toleriane Double Repair Face Moisturizer', 'La Roche-Posay', 'Skincare', '', '', 20, null, '/productos/crema-toleriane.webp', '["/productos/crema-toleriane.webp"]'::jsonb, null, 25, true) returning id into pid;
   insert into public.variants (product_id, name, stock) values (pid, '', 0);
 
 end $$;
