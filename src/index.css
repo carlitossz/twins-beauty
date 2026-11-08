@@ -134,3 +134,65 @@
 .animate-hero-in {
   animation: hero-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Ajustes: cada sección entra suave (en el teléfono desde la derecha, como pasar de pantalla) */
+@keyframes section-in {
+  0% {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes list-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-section-in {
+  animation: section-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-list-in {
+  animation: list-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+/* Las casillas de la sección aparecen una tras otra, rapidito */
+.animate-section-in .a-card > * {
+  animation: fade-in 0.35s ease-out both;
+}
+.animate-section-in .a-card > *:nth-child(2) { animation-delay: 40ms; }
+.animate-section-in .a-card > *:nth-child(3) { animation-delay: 80ms; }
+.animate-section-in .a-card > *:nth-child(4) { animation-delay: 120ms; }
+.animate-section-in .a-card > *:nth-child(n + 5) { animation-delay: 160ms; }
+@media (min-width: 1024px) {
+  .lg\:animate-none {
+    animation: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-section-in,
+  .animate-list-in,
+  .animate-fade-in,
+  .animate-section-in .a-card > * {
+    animation: none;
+  }
+}

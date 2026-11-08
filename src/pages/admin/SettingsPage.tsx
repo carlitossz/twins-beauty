@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Icon, Spinner } from '../../components/ui'
 import { api } from '../../lib/api'
 import { resetDemo } from '../../lib/demoApi'
-import { bs, digits, errorMessage, hoursText } from '../../lib/format'
+import { bs, cop, digits, errorMessage, hoursText } from '../../lib/format'
 import { useSettings } from '../../lib/store'
 import type { Currency, PaymentMethod, Settings } from '../../lib/types'
 import { ErrorBox, PageTitle, Toast, useConfirm } from './shared'
@@ -91,7 +91,7 @@ export default function SettingsPage() {
   // ---------- Lista principal ----------
   const listPanel = (
         <div className="mx-auto flex max-w-2xl flex-col gap-4 lg:sticky lg:top-6 lg:mx-0 lg:max-w-none">
-          <RateCard form={form} saving={saving} onSave={(rate) => save({ ...form, bs_rate: rate }, 'Tasa del día guardada', false)} />
+          <RateCard form={form} saving={saving} onSave={(bsRate, copRate) => save({ ...form, bs_rate: bsRate, cop_rate: copRate }, 'Tasas guardadas', false)} />
 
           {error && view === 'lista' && <ErrorBox message={error} />}
 
@@ -111,7 +111,7 @@ export default function SettingsPage() {
               summary={`Retiro, delivery y envío nacional${form.agencies.length ? ` · ${form.agencies.join(', ')}` : ''}`}
               active={view === 'entregas'} onClick={() => setView('entregas')}
             />
-            <Row icon="gear" title="Otros ajustes" summary="Nombre de la tienda, tasa en pesos y tiempo de apartado" active={view === 'otros'} onClick={() => setView('otros')} />
+            <Row icon="gear" title="Otros ajustes" summary="Nombre de la tienda y tiempo de apartado" active={view === 'otros'} onClick={() => setView('otros')} />
           </div>
 
           {api.mode === 'demo' && (
@@ -351,20 +351,6 @@ export default function SettingsPage() {
           <input className="a-field" value={form.store_name} onChange={(e) => set('store_name', e.target.value)} />
           <span className="font-normal text-muted">Sale en los mensajes de WhatsApp de los pedidos.</span>
         </label>
-        <label className="a-label">
-          Tasa en pesos (opcional)
-          <input
-            className="a-field"
-            type="number"
-            inputMode="decimal"
-            min="0"
-            step="1"
-            value={form.cop_rate ?? ''}
-            onChange={(e) => set('cop_rate', e.target.value === '' ? null : Number(e.target.value))}
-            placeholder="Vacío = no se calcula en pesos"
-          />
-          <span className="font-normal text-muted">Pesos por 1 dólar. Solo hace falta si aceptas pagos en pesos.</span>
-        </label>
         <div className="a-label">
           Horas que se apartan los productos de un pedido sin pagar
           <Stepper value={form.reserve_hours} min={0} max={168} onChange={(v) => set('reserve_hours', v)} />
@@ -385,8 +371,8 @@ export default function SettingsPage() {
       </div>
       {/* Teléfono: lista o sección, una a la vez. Computadora: la lista a la izquierda y la sección abierta a la derecha */}
       <div className="lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-8 2xl:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
-        <div className={view === 'lista' ? '' : 'hidden lg:block'}>{listPanel}</div>
-        <div className={view === 'lista' ? 'hidden lg:block' : ''}>
+        <div className={view === 'lista' ? 'animate-list-in lg:animate-none' : 'hidden lg:block'}>{listPanel}</div>
+        <div key={typeof view === 'object' ? `pago-${view.pago}` : view} className={view === 'lista' ? 'hidden animate-fade-in lg:block' : 'animate-section-in'}>
           {view === 'lista' ? (
             <div className="a-card flex min-h-[320px] flex-col items-center justify-center gap-3 p-8 text-center">
               <span className="grid h-14 w-14 place-items-center rounded-full bg-blush">
@@ -410,31 +396,57 @@ export default function SettingsPage() {
 
 const chip = (on: boolean) => `h-10 rounded-full border px-4 text-sm font-semibold ${on ? 'border-cocoa bg-cocoa text-cream' : 'border-line2 bg-white'}`
 
-/** La tasa del día, siempre a mano arriba de la lista */
-function RateCard({ form, saving, onSave }: { form: Settings; saving: boolean; onSave: (rate: number | null) => void }) {
-  const [value, setValue] = useState(form.bs_rate != null ? String(form.bs_rate) : '')
-  useEffect(() => setValue(form.bs_rate != null ? String(form.bs_rate) : ''), [form.bs_rate])
-  const num = value.trim() === '' ? null : Number(value.replace(',', '.'))
-  const valid = num == null || (Number.isFinite(num) && num > 0)
-  const changed = num !== form.bs_rate
+/** Las tasas del día (bolívares y pesos) juntas, siempre a mano arriba de la lista */
+function RateCard({ form, saving, onSave }: { form: Settings; saving: boolean; onSave: (bsRate: number | null, copRate: number | null) => void }) {
+  // Se muestran como se escriben aquí: coma para decimales (45,50) y sin puntos en los pesos
+  const text = (n: number | null) => (n != null ? String(n).replace('.', ',') : '')
+  const [bsValue, setBs] = useState(text(form.bs_rate))
+  const [copValue, setCop] = useState(text(form.cop_rate))
+  useEffect(() => setBs(text(form.bs_rate)), [form.bs_rate])
+  useEffect(() => setCop(text(form.cop_rate)), [form.cop_rate])
+  /** "1.234,56" o "45,5" o "45.5" → número. En pesos el punto siempre es de miles ("3.900") */
+  const toNumber = (v: string, dotIsThousands: boolean) => {
+    const t = v.trim().replace(/\s/g, '')
+    if (!t) return null
+    const clean = t.includes(',') || dotIsThousands ? t.replace(/\./g, '').replace(',', '.') : t
+    return Number(clean)
+  }
+  const parse = (v: string) => toNumber(v, true)
+  const parseBs = (v: string) => toNumber(v, false)
+  const bsNum = parseBs(bsValue)
+  const copNum = parse(copValue)
+  const ok = (n: number | null) => n == null || (Number.isFinite(n) && n > 0)
+  const valid = ok(bsNum) && ok(copNum)
+  const changed = bsNum !== form.bs_rate || copNum !== form.cop_rate
+  const example = [bsNum && ok(bsNum) ? bs(bsNum * 10) : null, copNum && ok(copNum) ? cop(copNum * 10) : null].filter(Boolean).join(' o ')
   return (
     <section className="flex flex-col gap-3 rounded-[22px] bg-cocoa p-5 text-cream">
       <div>
-        <h2 className="text-lg font-bold">Tasa del día</h2>
-        <p className="text-sm text-cream/80">Con esta tasa se calculan los precios en bolívares.</p>
+        <h2 className="text-lg font-bold">Tasas del día</h2>
+        <p className="text-sm text-cream/80">Con estas tasas se calculan los precios en bolívares y en pesos.</p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-base font-semibold">1 $ =</span>
-        <label className="flex h-14 min-w-0 flex-1 basis-40 items-center gap-2 rounded-2xl bg-cream px-4 text-cocoa">
-          <span className="font-semibold">Bs</span>
-          <input className="w-full min-w-0 flex-1 bg-transparent text-2xl font-bold outline-none" size={6} inputMode="decimal" aria-label="Bolívares por un dólar" value={value} onChange={(e) => setValue(e.target.value)} placeholder="0,00" />
-        </label>
-        <button type="button" disabled={saving || !valid || !changed} onClick={() => onSave(num)} className="h-14 w-full rounded-2xl bg-blush px-5 font-bold text-cocoa disabled:opacity-50 sm:w-auto">
-          {saving ? 'Guardando…' : 'Guardar tasa'}
-        </button>
-      </div>
-      <p className="text-xs text-cream/80">{num && valid ? `Ejemplo: un producto de $10 sale en ${bs(num * 10)}.` : 'Sin tasa, a la clienta le sale el precio en dólares para pagar en Bs.'}</p>
+      <RateInput currency="Bs" label="Bolívares por un dólar" value={bsValue} onChange={setBs} placeholder="0,00" />
+      <RateInput currency="COP" label="Pesos por un dólar" value={copValue} onChange={setCop} placeholder="Opcional" />
+      {!valid && <p className="text-xs font-semibold text-blush">Revisa las tasas: solo números mayores que cero.</p>}
+      <button type="button" disabled={saving || !valid || !changed} onClick={() => onSave(bsNum, copNum)} className="h-12 w-full rounded-2xl bg-blush px-5 font-bold text-cocoa transition active:scale-[0.98] disabled:opacity-50">
+        {saving ? 'Guardando…' : 'Guardar tasas'}
+      </button>
+      <p className="text-xs text-cream/80">
+        {example ? `Ejemplo: un producto de $10 sale en ${example}.` : 'Sin tasa, a la clienta le sale el precio en dólares.'} Los pesos son opcionales: déjalos vacíos si no aceptas pesos.
+      </p>
     </section>
+  )
+}
+
+function RateInput({ currency, label, value, onChange, placeholder }: { currency: string; label: string; value: string; onChange: (v: string) => void; placeholder: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="w-12 shrink-0 text-base font-semibold">1 $ =</span>
+      <label className="flex h-14 min-w-0 flex-1 items-center gap-2 rounded-2xl bg-cream px-4 text-cocoa">
+        <span className="w-9 shrink-0 font-semibold">{currency}</span>
+        <input className="w-full min-w-0 flex-1 bg-transparent text-2xl font-bold outline-none placeholder:text-lg placeholder:font-semibold placeholder:text-muted/60" size={6} inputMode="decimal" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} />
+      </label>
+    </div>
   )
 }
 
@@ -458,7 +470,7 @@ function Row({
       type="button"
       onClick={onClick}
       aria-current={active ? 'true' : undefined}
-      className={`flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-cream/60 ${active ? 'lg:bg-sand lg:shadow-[inset_4px_0_0_#6D5247] lg:hover:bg-sand' : ''}`}
+      className={`flex w-full items-center gap-3 px-4 py-4 text-left transition duration-200 hover:bg-cream/60 active:bg-sand ${active ? 'lg:bg-sand lg:shadow-[inset_4px_0_0_#6D5247] lg:hover:bg-sand' : ''}`}
     >
       <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${warn ? 'bg-[#FBE3DE] text-[#8A2B1E]' : 'bg-blush'}`}>
         <Icon name={icon} size={19} />
@@ -530,9 +542,13 @@ function Switch({ on, onChange, label, small = false }: { on: boolean; onChange:
       aria-checked={on}
       aria-label={label}
       onClick={() => onChange(!on)}
-      className={`flex shrink-0 rounded-full p-[3px] transition ${small ? 'h-6 w-10' : 'h-8 w-14'} ${on ? 'justify-end bg-cocoa' : 'justify-start bg-line2'}`}
+      className={`flex shrink-0 rounded-full p-[3px] transition-colors duration-200 ${small ? 'h-6 w-10' : 'h-8 w-14'} ${on ? 'bg-cocoa' : 'bg-line2'}`}
     >
-      <span className={`rounded-full bg-white shadow ${small ? 'h-[18px] w-[18px]' : 'h-[26px] w-[26px]'}`} />
+      <span
+        className={`rounded-full bg-white shadow transition-transform duration-200 ease-out ${small ? 'h-[18px] w-[18px]' : 'h-[26px] w-[26px]'} ${
+          on ? (small ? 'translate-x-4' : 'translate-x-6') : 'translate-x-0'
+        }`}
+      />
     </button>
   )
 }
