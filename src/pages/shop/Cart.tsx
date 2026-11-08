@@ -77,7 +77,7 @@ export default function CartPage() {
               const unit = pricing.unit[idx]
               const atWholesale = pricing.wholesale && i.price_wholesale != null
               return (
-                <div key={i.variant_id} className="flex items-center gap-3.5 rounded-[20px] bg-white p-3">
+                <div key={i.variant_id} style={{ animationDelay: `${Math.min(idx, 8) * 50}ms` }} className="animate-card-in flex items-center gap-3.5 rounded-[20px] bg-white p-3">
                   <Link to={`/producto/${i.product_id}`} className="h-[76px] w-[76px] shrink-0 overflow-hidden rounded-2xl">
                     <ProductImage src={i.image_url} alt={i.name} className="h-full w-full" />
                   </Link>
@@ -123,7 +123,7 @@ export default function CartPage() {
             </Link>
           </main>
 
-          <div className="fixed inset-x-0 bottom-0 z-10 lg:sticky lg:bottom-auto lg:top-28 lg:z-auto">
+          <div className="animate-bar-in fixed inset-x-0 bottom-0 z-10 lg:sticky lg:bottom-auto lg:top-28 lg:z-auto">
             <div className="mx-auto flex max-w-[34rem] flex-col gap-2.5 rounded-t-[28px] bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-8px_24px_rgba(109,82,71,0.10)] lg:max-w-none lg:rounded-[28px] lg:p-6 lg:shadow-none">
               <h2 className="hidden text-lg font-bold lg:block">Resumen</h2>
               {pricing.wholesale && (

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { usd } from '../lib/format'
 import { useCart, useSettings } from '../lib/store'
 import { waLink } from '../lib/whatsapp'
@@ -12,11 +12,11 @@ export function CartButton() {
     <Link
       to="/carrito"
       aria-label={count ? `Ver carrito, ${count} ${count === 1 ? 'producto' : 'productos'}` : 'Ver carrito'}
-      className="relative flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full bg-cocoa text-cream lg:px-4"
+      className="relative flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-full bg-cocoa text-cream transition active:scale-95 lg:px-4"
     >
       <Icon name="bag" size={20} />
       {count > 0 && <span className="hidden text-sm font-semibold lg:inline">{usd(pricing.total)}</span>}
-      {count > 0 && <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-blush px-1 text-[11px] font-bold text-cocoa">{count}</span>}
+      {count > 0 && <span key={count} className="animate-pop absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-blush px-1 text-[11px] font-bold text-cocoa">{count}</span>}
     </Link>
   )
 }
@@ -47,6 +47,7 @@ export function WhatsAppFab({ raised = false }: { raised?: boolean }) {
  */
 export function ShopShell({ children, header = true, narrow = false }: { children: ReactNode; header?: boolean | 'desktop'; narrow?: boolean }) {
   const { settings } = useSettings()
+  const { pathname } = useLocation()
   return (
     <div className="min-h-screen bg-cream">
       <DemoBanner />
@@ -71,7 +72,7 @@ export function ShopShell({ children, header = true, narrow = false }: { childre
           </div>
         </header>
       )}
-      <div className={`mx-auto min-h-screen ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-[1560px] lg:px-5'}`}>{children}</div>
+      <div key={pathname} className={`animate-page-in mx-auto min-h-screen ${narrow ? 'max-w-[34rem]' : 'max-w-[34rem] lg:max-w-[1560px] lg:px-5'}`}>{children}</div>
     </div>
   )
 }

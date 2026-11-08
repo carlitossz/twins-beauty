@@ -124,7 +124,7 @@ export default function ProductDetail() {
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start lg:gap-12 lg:px-5 lg:pt-6 2xl:grid-cols-[minmax(0,680px)_minmax(0,1fr)] 2xl:gap-16">
       <div className="relative px-5 pt-4 lg:sticky lg:top-28 lg:px-0 lg:pt-0">
         <div className="relative aspect-square overflow-hidden rounded-[28px] bg-white">
-          <ProductImage src={mainImg} alt={showingSwatch ? `Carta de tonos de ${p.name}` : p.name} className="h-full w-full" fit={showingSwatch ? 'contain' : 'cover'} />
+          <ProductImage key={mainImg ?? 'x'} src={mainImg} alt={showingSwatch ? `Carta de tonos de ${p.name}` : p.name} className="animate-img-in h-full w-full" fit={showingSwatch ? 'contain' : 'cover'} />
           <div className="absolute left-3 right-3 top-3 flex justify-between lg:hidden">
             <BackButton to="/" label="Volver al catálogo" />
             <CartButton />
@@ -163,7 +163,7 @@ export default function ProductDetail() {
         )}
       </div>
 
-      <main className="flex flex-col gap-5 px-5 pb-40 pt-5 lg:px-0 lg:pb-16 lg:pt-0">
+      <main className="animate-rise-in flex flex-col gap-5 px-5 pb-40 pt-5 lg:px-0 lg:pb-16 lg:pt-0">
         <section className="flex flex-col gap-1">
           <span className="text-[12.5px] font-medium">{p.brand} · Original</span>
           <h1 className="text-[25px] font-bold leading-tight lg:text-[34px]">{p.name}</h1>
@@ -203,7 +203,7 @@ export default function ProductDetail() {
                         aria-label={v.name}
                         title={v.name}
                         onClick={() => pick(v)}
-                        className="justify-self-center rounded-full transition"
+                        className="justify-self-center rounded-full transition duration-200 hover:scale-110 active:scale-90"
                         style={{
                           width: 46,
                           height: 46,
@@ -223,7 +223,7 @@ export default function ProductDetail() {
         )}
 
         {!soldOut && (
-          <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-cream lg:static lg:z-auto lg:border-0 lg:bg-transparent">
+          <div className="animate-bar-in fixed inset-x-0 bottom-0 z-10 border-t border-line bg-cream lg:static lg:z-auto lg:border-0 lg:bg-transparent">
             <div className="mx-auto flex max-w-[34rem] flex-col gap-2 px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 lg:mx-0 lg:max-w-none lg:px-0 lg:pb-0 lg:pt-0">
               {added && (
                 <div role="status" className="animate-reveal flex items-center justify-between gap-3 rounded-2xl bg-blush px-4 py-2.5 text-[13px]">

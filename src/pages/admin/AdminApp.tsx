@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
+import { NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { DemoBanner, Icon, Iso, Logo, Spinner } from '../../components/ui'
 import { api } from '../../lib/api'
 import { DEMO_PASSWORD } from '../../lib/demoApi'
@@ -56,6 +56,7 @@ export default function AdminApp() {
 }
 
 function AdminShell({ email, onLogout }: { email: string; onLogout: () => void }) {
+  const { pathname } = useLocation()
   const { pending } = useOrderAlerts()
 
   return (
@@ -112,7 +113,7 @@ function AdminShell({ email, onLogout }: { email: string; onLogout: () => void }
         </header>
 
         <main className="min-w-0 flex-1 px-4 pb-28 pt-5 md:px-10 md:pb-12 md:pt-8">
-          <div className="mx-auto max-w-6xl">
+          <div key={pathname} className="animate-page-in mx-auto max-w-6xl">
             <Routes>
               <Route index element={<Dashboard />} />
               <Route path="pedidos" element={<Orders />} />

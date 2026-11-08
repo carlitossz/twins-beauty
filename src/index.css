@@ -196,3 +196,110 @@
     animation: none;
   }
 }
+
+/* ---------- Movimiento en toda la app ---------- */
+/* Cambio de página: solo se desvanece (sin mover nada, así las barras fijas de abajo no saltan) */
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-page-in {
+  animation: page-in 0.35s ease-out both;
+}
+/* Tarjetas de productos y del carrito: suben un poquito mientras aparecen */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes card-in-dim {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 0.6;
+    transform: none;
+  }
+}
+.animate-card-in {
+  animation: card-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.animate-card-in-dim {
+  animation: card-in-dim 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* Detalle del producto: la información sube y la foto cambia suave al elegir otro tono */
+/* En el teléfono solo se desvanece: adentro va la barra fija de "Agregar" y no debe moverse */
+.animate-rise-in {
+  animation: page-in 0.4s ease-out 0.06s both;
+}
+@media (min-width: 1024px) {
+  .animate-rise-in {
+    animation: card-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+  }
+}
+@keyframes img-in {
+  from {
+    opacity: 0;
+    transform: scale(1.03);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.animate-img-in {
+  animation: img-in 0.4s ease-out both;
+}
+/* El numerito del carrito "salta" cuando agregas algo */
+@keyframes pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.animate-pop {
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+/* Barras de abajo en el teléfono: suben desde el borde */
+@keyframes bar-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (max-width: 1023px) {
+  .animate-bar-in {
+    animation: bar-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-page-in,
+  .animate-card-in,
+  .animate-card-in-dim,
+  .animate-rise-in,
+  .animate-img-in,
+  .animate-pop,
+  .animate-bar-in {
+    animation: none;
+  }
+  .animate-card-in-dim {
+    opacity: 0.6;
+  }
+}

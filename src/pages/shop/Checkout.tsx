@@ -178,7 +178,7 @@ export default function Checkout() {
               </Link>
             </div>
           </section>
-          <div className="fixed inset-x-0 bottom-0 z-10 lg:static lg:z-auto">
+          <div className="animate-bar-in fixed inset-x-0 bottom-0 z-10 lg:static lg:z-auto">
             <div className="mx-auto flex max-w-[34rem] flex-col gap-2.5 rounded-t-[28px] bg-white px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 shadow-[0_-8px_24px_rgba(109,82,71,0.10)] lg:max-w-none lg:rounded-[28px] lg:p-6 lg:shadow-none">
               <div className="flex items-baseline justify-between gap-3">
                 <span className="text-xs">
@@ -201,9 +201,9 @@ export default function Checkout() {
           <fieldset className="flex flex-col gap-2.5">
             <legend className="mb-3 text-[15px] font-bold">1 · ¿Cómo lo recibes?</legend>
             {options.map(([value, label, hint, icon]) => (
-              <label key={value} className={`flex cursor-pointer items-center gap-3.5 rounded-[20px] border-2 bg-white px-4 py-3.5 ${delivery === value ? 'border-cocoa' : 'border-transparent'}`}>
+              <label key={value} className={`flex cursor-pointer items-center gap-3.5 rounded-[20px] border-2 bg-white px-4 py-3.5 transition duration-200 active:scale-[0.98] ${delivery === value ? 'border-cocoa' : 'border-transparent'}`}>
                 <input type="radio" name="delivery" value={value} checked={delivery === value} onChange={() => setDelivery(value)} className="sr-only" />
-                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full ${delivery === value ? 'bg-cocoa text-cream' : 'bg-sand'}`}>
+                <span className={`grid h-10 w-10 shrink-0 place-items-center rounded-full transition-colors duration-200 ${delivery === value ? 'bg-cocoa text-cream' : 'bg-sand'}`}>
                   <Icon name={icon} size={18} />
                 </span>
                 <span className="flex flex-col gap-0.5">

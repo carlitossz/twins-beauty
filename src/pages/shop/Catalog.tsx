@@ -144,9 +144,9 @@ export default function Catalog() {
                     <span className="text-muted">Escríbenos por WhatsApp y te ayudamos a buscarlo.</span>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-x-3.5 gap-y-5 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-9 xl:grid-cols-4 2xl:grid-cols-5">
-                    {shown.map((p) => (
-                      <ProductCard key={p.id} product={p} />
+                  <div key={cat} className="grid grid-cols-2 gap-x-3.5 gap-y-5 lg:grid-cols-3 lg:gap-x-6 lg:gap-y-9 xl:grid-cols-4 2xl:grid-cols-5">
+                    {shown.map((p, i) => (
+                      <ProductCard key={p.id} product={p} index={i} />
                     ))}
                   </div>
                 )}
@@ -215,14 +215,18 @@ function Hero({ hero, featured }: { hero: Product | undefined; featured: Product
   )
 }
 
-function ProductCard({ product: p }: { product: Product }) {
+function ProductCard({ product: p, index = 0 }: { product: Product; index?: number }) {
   const withTones = hasTones(p)
   const inStock = tonesInStock(p)
   const soldOut = totalStock(p) === 0
   return (
-    <Link to={`/producto/${p.id}`} className={`group flex flex-col gap-2 ${soldOut ? 'opacity-60' : ''}`}>
-      <div className="relative aspect-square overflow-hidden rounded-[20px] bg-white">
-        <ProductImage src={p.image_url} alt={p.name} className="h-full w-full transition duration-300 lg:group-hover:scale-105" />
+    <Link
+      to={`/producto/${p.id}`}
+      style={{ animationDelay: `${Math.min(index, 12) * 45}ms` }}
+      className={`group flex flex-col gap-2 transition-transform duration-200 active:scale-[0.97] ${soldOut ? 'animate-card-in-dim' : 'animate-card-in'}`}
+    >
+      <div className="relative aspect-square overflow-hidden rounded-[20px] bg-white transition-shadow duration-300 lg:group-hover:shadow-[0_12px_30px_rgba(109,82,71,0.14)]">
+        <ProductImage src={p.image_url} alt={p.name} className="h-full w-full transition duration-500 ease-out lg:group-hover:scale-105" />
         {soldOut ? (
           <span className="absolute left-2.5 top-2.5 rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold">Agotado</span>
         ) : (
