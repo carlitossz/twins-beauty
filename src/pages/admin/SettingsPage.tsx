@@ -13,6 +13,9 @@ import { ErrorBox, PageTitle, Toast, useConfirm } from './shared'
 
 type View = 'lista' | 'whatsapp' | 'pagos' | 'mayor' | 'entregas' | 'otros' | { pago: number }
 
+/** Computadora: lista y sección lado a lado (mismo corte que lg de Tailwind) */
+const isDesktop = () => typeof window !== 'undefined' && window.matchMedia('(min-width: 1024px)').matches
+
 const CURRENCY_LABEL: Record<Currency, string> = { USD: 'Dólares', BS: 'Bolívares', COP: 'Pesos' }
 
 export default function SettingsPage() {
@@ -72,7 +75,7 @@ export default function SettingsPage() {
       setForm(clean)
       await reload()
       setToast(message)
-      if (back) setView('lista')
+      if (back && !isDesktop()) setView('lista')
       return true
     } catch (err) {
       setError(errorMessage(err))
@@ -82,17 +85,15 @@ export default function SettingsPage() {
     }
   }
 
+  const f: Settings = form
   const enabled = form.payment_methods.filter((m) => m.enabled && m.name.trim())
 
   // ---------- Lista principal ----------
-  if (view === 'lista') {
-    return (
-      <>
-        <PageTitle title="Ajustes" subtitle="Toca una sección para cambiarla." />
-        <div className="mx-auto flex max-w-2xl flex-col gap-4">
+  const listPanel = (
+        <div className="mx-auto flex max-w-2xl flex-col gap-4 lg:sticky lg:top-6 lg:mx-0 lg:max-w-none">
           <RateCard form={form} saving={saving} onSave={(rate) => save({ ...form, bs_rate: rate }, 'Tasa del día guardada', false)} />
 
-          {error && <ErrorBox message={error} />}
+          {error && view === 'lista' && <ErrorBox message={error} />}
 
           <div className="a-card divide-y divide-line overflow-hidden">
             <Row
@@ -100,17 +101,17 @@ export default function SettingsPage() {
               title="WhatsApp de la tienda"
               summary={digits(form.whatsapp) ? `+${digits(form.whatsapp)}` : 'Falta el número: los pedidos no tienen a dónde llegar'}
               warn={!digits(form.whatsapp)}
-              onClick={() => setView('whatsapp')}
+              active={view === 'whatsapp'} onClick={() => setView('whatsapp')}
             />
-            <Row icon="card" title="Métodos de pago" summary={enabled.length ? `${enabled.map((m) => m.name).join(', ')}` : 'Ninguno prendido'} warn={!enabled.length} onClick={() => setView('pagos')} />
-            <Row icon="sparkle" title="Precio al mayor" summary={form.wholesale_min > 0 ? `Desde ${form.wholesale_min} productos` : 'Apagado'} onClick={() => setView('mayor')} />
+            <Row icon="card" title="Métodos de pago" summary={enabled.length ? `${enabled.map((m) => m.name).join(', ')}` : 'Ninguno prendido'} warn={!enabled.length} active={view === 'pagos' || typeof view === 'object'} onClick={() => setView('pagos')} />
+            <Row icon="sparkle" title="Precio al mayor" summary={form.wholesale_min > 0 ? `Desde ${form.wholesale_min} productos` : 'Apagado'} active={view === 'mayor'} onClick={() => setView('mayor')} />
             <Row
               icon="truck"
               title="Entregas y envíos"
               summary={`Retiro, delivery y envío nacional${form.agencies.length ? ` · ${form.agencies.join(', ')}` : ''}`}
-              onClick={() => setView('entregas')}
+              active={view === 'entregas'} onClick={() => setView('entregas')}
             />
-            <Row icon="gear" title="Otros ajustes" summary="Nombre de la tienda, tasa en pesos y tiempo de apartado" onClick={() => setView('otros')} />
+            <Row icon="gear" title="Otros ajustes" summary="Nombre de la tienda, tasa en pesos y tiempo de apartado" active={view === 'otros'} onClick={() => setView('otros')} />
           </div>
 
           {api.mode === 'demo' && (
@@ -128,254 +129,280 @@ export default function SettingsPage() {
             </button>
           )}
         </div>
-        <Toast text={toast} />
-        {dialog}
-      </>
-    )
-  }
+  )
 
-  // ---------- Editar un método de pago ----------
-  if (typeof view === 'object') {
-    const i = view.pago
-    const m = form.payment_methods[i]
-    if (!m) {
-      setView('pagos')
-      return null
-    }
-    const setM = (patch: Partial<PaymentMethod>) => set('payment_methods', form.payment_methods.map((x, j) => (j === i ? { ...x, ...patch } : x)))
-    const setField = (k: number, patch: Partial<PaymentMethod['fields'][number]>) => setM({ fields: m.fields.map((f, j) => (j === k ? { ...f, ...patch } : f)) })
 
-    return (
-      <Section
-        title={m.name.trim() || 'Nuevo método de pago'}
-        back={() => {
-          setForm(settings)
-          setView('pagos')
-        }}
-        backLabel="Métodos de pago"
-        error={error}
-        saving={saving}
-        onSave={async () => {
-          if (!m.name.trim()) return setError('Ponle un nombre al método de pago.')
-          if (await save(form, 'Método de pago guardado', false)) setView('pagos')
-        }}
-        extra={
-          <button
-            type="button"
-            className="a-btn text-[#8A2B1E]"
-            onClick={async () => {
-              if (!(await confirm(`¿Quitar "${m.name || 'este método'}"? Las clientas ya no lo verán.`, 'Sí, quitar'))) return
-              const next = { ...form, payment_methods: form.payment_methods.filter((_, j) => j !== i) }
-              if (await save(next, 'Método quitado', false)) setView('pagos')
-            }}
-          >
-            <Icon name="trash" size={16} /> Quitar
-          </button>
-        }
-      >
-        <label className="a-label">
-          Nombre
-          <input className="a-field h-12 text-base" value={m.name} onChange={(e) => setM({ name: e.target.value })} placeholder="Ej. Pago móvil" />
-        </label>
+  function detail(): ReactNode {
+    const form = f
+    // ---------- Editar un método de pago ----------
+    if (typeof view === 'object') {
+      const i = view.pago
+      const m = form.payment_methods[i]
+      if (!m) {
+        setView('pagos')
+        return null
+      }
+      const setM = (patch: Partial<PaymentMethod>) => set('payment_methods', form.payment_methods.map((x, j) => (j === i ? { ...x, ...patch } : x)))
+      const setField = (k: number, patch: Partial<PaymentMethod['fields'][number]>) => setM({ fields: m.fields.map((f, j) => (j === k ? { ...f, ...patch } : f)) })
 
-        <div className="a-label">
-          ¿En qué moneda paga la clienta?
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Moneda">
-            {(Object.keys(CURRENCY_LABEL) as Currency[]).map((c) => (
-              <button key={c} type="button" aria-pressed={m.currency === c} onClick={() => setM({ currency: c })} className={chip(m.currency === c)}>
-                {CURRENCY_LABEL[c]}
-              </button>
-            ))}
-          </div>
-        </div>
+      return (
+        <Section
+          title={m.name.trim() || 'Nuevo método de pago'}
+          back={() => {
+            setForm(settings)
+            setView('pagos')
+          }}
+          backLabel="Métodos de pago"
+          error={error}
+          saving={saving}
+          onSave={async () => {
+            if (!m.name.trim()) return setError('Ponle un nombre al método de pago.')
+            if (await save(form, 'Método de pago guardado', false)) setView('pagos')
+          }}
+          extra={
+            <button
+              type="button"
+              className="a-btn text-[#8A2B1E]"
+              onClick={async () => {
+                if (!(await confirm(`¿Quitar "${m.name || 'este método'}"? Las clientas ya no lo verán.`, 'Sí, quitar'))) return
+                const next = { ...form, payment_methods: form.payment_methods.filter((_, j) => j !== i) }
+                if (await save(next, 'Método quitado', false)) setView('pagos')
+              }}
+            >
+              <Icon name="trash" size={16} /> Quitar
+            </button>
+          }
+        >
+          <label className="a-label">
+            Nombre
+            <input className="a-field h-12 text-base" value={m.name} onChange={(e) => setM({ name: e.target.value })} placeholder="Ej. Pago móvil" />
+          </label>
 
-        <Toggle
-          on={m.cash}
-          onChange={(v) => setM({ cash: v })}
-          title="Es efectivo en mano"
-          hint="La clienta puede decir con cuánto paga y le sale el vuelto que hay que llevarle."
-        />
-
-        {!m.cash && (
-          <div className="flex flex-col gap-3">
-            <div>
-              <p className="text-sm font-bold">Datos para pagar</p>
-              <p className="text-xs text-muted">Lo que la clienta necesita para hacer el pago. Prende "Copiar" solo en lo que va a pegar en su banco (teléfono, cédula, cuenta).</p>
+          <div className="a-label">
+            ¿En qué moneda paga la clienta?
+            <div className="flex flex-wrap gap-2" role="group" aria-label="Moneda">
+              {(Object.keys(CURRENCY_LABEL) as Currency[]).map((c) => (
+                <button key={c} type="button" aria-pressed={m.currency === c} onClick={() => setM({ currency: c })} className={chip(m.currency === c)}>
+                  {CURRENCY_LABEL[c]}
+                </button>
+              ))}
             </div>
-            {m.fields.map((f, k) => (
-              <div key={k} className="flex flex-col gap-2 rounded-2xl border border-line bg-cream/50 p-3">
-                <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
-                  <input className="a-field" aria-label="Qué dato es" value={f.label} onChange={(e) => setField(k, { label: e.target.value })} placeholder="Ej. Teléfono" />
-                  <input className="a-field font-semibold" aria-label="El dato" value={f.value} onChange={(e) => setField(k, { value: e.target.value })} placeholder="Ej. 0414-1234567" />
+          </div>
+
+          <Toggle
+            on={m.cash}
+            onChange={(v) => setM({ cash: v })}
+            title="Es efectivo en mano"
+            hint="La clienta puede decir con cuánto paga y le sale el vuelto que hay que llevarle."
+          />
+
+          {!m.cash && (
+            <div className="flex flex-col gap-3">
+              <div>
+                <p className="text-sm font-bold">Datos para pagar</p>
+                <p className="text-xs text-muted">Lo que la clienta necesita para hacer el pago. Prende "Copiar" solo en lo que va a pegar en su banco (teléfono, cédula, cuenta).</p>
+              </div>
+              {m.fields.map((f, k) => (
+                <div key={k} className="flex flex-col gap-2 rounded-2xl border border-line bg-cream/50 p-3">
+                  <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
+                    <input className="a-field" aria-label="Qué dato es" value={f.label} onChange={(e) => setField(k, { label: e.target.value })} placeholder="Ej. Teléfono" />
+                    <input className="a-field font-semibold" aria-label="El dato" value={f.value} onChange={(e) => setField(k, { value: e.target.value })} placeholder="Ej. 0414-1234567" />
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <label className="flex items-center gap-2 text-xs font-semibold">
+                      <Switch on={f.copyable} onChange={(v) => setField(k, { copyable: v })} label={`Botón de copiar para ${f.label || 'este dato'}`} small />
+                      Botón de copiar
+                    </label>
+                    <button type="button" className="flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-[#8A2B1E] hover:bg-[#FBE3DE]" onClick={() => setM({ fields: m.fields.filter((_, j) => j !== k) })}>
+                      <Icon name="trash" size={14} /> Quitar
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <label className="flex items-center gap-2 text-xs font-semibold">
-                    <Switch on={f.copyable} onChange={(v) => setField(k, { copyable: v })} label={`Botón de copiar para ${f.label || 'este dato'}`} small />
-                    Botón de copiar
-                  </label>
-                  <button type="button" className="flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-semibold text-[#8A2B1E] hover:bg-[#FBE3DE]" onClick={() => setM({ fields: m.fields.filter((_, j) => j !== k) })}>
-                    <Icon name="trash" size={14} /> Quitar
-                  </button>
-                </div>
+              ))}
+              <button type="button" className="flex h-11 items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-mauve text-sm font-semibold" onClick={() => setM({ fields: [...m.fields, { label: '', value: '', copyable: true }] })}>
+                <Icon name="plus" size={16} /> Agregar dato
+              </button>
+            </div>
+          )}
+
+          <label className="a-label">
+            Nota para la clienta (opcional)
+            <input className="a-field" value={m.note} onChange={(e) => setM({ note: e.target.value })} placeholder='Ej. "A la tasa del día"' />
+          </label>
+        </Section>
+      )
+    }
+
+    // ---------- Lista de métodos de pago ----------
+    if (view === 'pagos') {
+      return (
+        <Section title="Métodos de pago" back={() => setView('lista')} backOnDesktop={false} error={error} hideSave>
+          <p className="text-sm text-muted">Prende o apaga cada método con el interruptor. Toca uno para cambiar sus datos.</p>
+          <div className="flex flex-col gap-2">
+            {form.payment_methods.map((m, i) => (
+              <div key={i} className={`flex items-center gap-3 rounded-2xl border p-3 ${m.enabled ? 'border-line bg-white' : 'border-dashed border-line2 bg-cream/60'}`}>
+                <button type="button" className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => setView({ pago: i })}>
+                  <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${m.enabled ? 'bg-blush' : 'bg-sand'}`}>
+                    <Icon name="card" size={18} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold">{m.name || 'Sin nombre'}</span>
+                    <span className="block truncate text-xs text-muted">
+                      {CURRENCY_LABEL[m.currency]}
+                      {m.cash ? ' · efectivo' : m.fields.filter((f) => f.value.trim()).length ? ` · ${m.fields.filter((f) => f.value.trim()).length} datos` : ' · faltan los datos'}
+                    </span>
+                  </span>
+                </button>
+                <Switch
+                  on={m.enabled}
+                  label={`${m.enabled ? 'Apagar' : 'Prender'} ${m.name}`}
+                  onChange={(v) => {
+                    const next = { ...form, payment_methods: form.payment_methods.map((x, j) => (j === i ? { ...x, enabled: v } : x)) }
+                    void save(next, v ? `${m.name} prendido` : `${m.name} apagado`, false)
+                  }}
+                />
               </div>
             ))}
-            <button type="button" className="flex h-11 items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-mauve text-sm font-semibold" onClick={() => setM({ fields: [...m.fields, { label: '', value: '', copyable: true }] })}>
-              <Icon name="plus" size={16} /> Agregar dato
-            </button>
           </div>
-        )}
+          <button
+            type="button"
+            className="flex h-12 items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-mauve text-sm font-semibold"
+            onClick={() => {
+              set('payment_methods', [...form.payment_methods, { name: '', currency: 'USD', note: '', fields: [], enabled: true, cash: false }])
+              setView({ pago: form.payment_methods.length })
+            }}
+          >
+            <Icon name="plus" size={16} /> Agregar método de pago
+          </button>
+        </Section>
+      )
+    }
 
-        <label className="a-label">
-          Nota para la clienta (opcional)
-          <input className="a-field" value={m.note} onChange={(e) => setM({ note: e.target.value })} placeholder='Ej. "A la tasa del día"' />
-        </label>
-        {dialog}
-      </Section>
-    )
-  }
+    // ---------- Secciones simples ----------
+    const common = {
+      back: () => {
+        setForm(settings)
+        // En computadora la lista siempre está a la izquierda: Cancelar solo descarta los cambios
+        if (!isDesktop()) setView('lista')
+      },
+      error,
+      saving,
+      onSave: () => void save()
+    }
 
-  // ---------- Lista de métodos de pago ----------
-  if (view === 'pagos') {
+    if (view === 'whatsapp') {
+      return (
+        <Section title="WhatsApp de la tienda" {...common} backOnDesktop={false}>
+          <p className="text-sm text-muted">A este número llegan los pedidos y las preguntas de las clientas.</p>
+          <label className="a-label">
+            Número con código de país
+            <input className="a-field h-12 text-lg font-semibold" type="tel" inputMode="tel" value={form.whatsapp} onChange={(e) => set('whatsapp', e.target.value)} placeholder="584141234567" />
+            <span className="font-normal text-muted">Para Venezuela empieza con 58 y va sin el 0. Ej.: 0414-1234567 se escribe 584141234567.</span>
+          </label>
+        </Section>
+      )
+    }
+
+    if (view === 'mayor') {
+      return (
+        <Section title="Precio al mayor" {...common} backOnDesktop={false}>
+          <Toggle on={form.wholesale_min > 0} onChange={(v) => set('wholesale_min', v ? 6 : 0)} title="Usar precio al mayor" hint="Si está apagado, todo se cobra al detal." />
+          {form.wholesale_min > 0 && (
+            <>
+              <div className="a-label">
+                ¿Desde cuántos productos?
+                <Stepper value={form.wholesale_min} min={2} onChange={(v) => set('wholesale_min', v)} />
+              </div>
+              <p className="rounded-2xl bg-blush px-4 py-3 text-sm">
+                Si la clienta lleva <b>{form.wholesale_min} productos o más</b> (puede mezclar), los que tienen precio al mayor se le cobran al mayor. Las brochas, la crema y lo que solo se vende al detal no cuentan.
+              </p>
+            </>
+          )}
+        </Section>
+      )
+    }
+
+    if (view === 'entregas') {
+      return (
+        <Section title="Entregas y envíos" {...common} backOnDesktop={false}>
+          <p className="text-sm text-muted">Lo que lee la clienta debajo de cada forma de entrega.</p>
+          <label className="a-label">
+            Retiro personal
+            <textarea className="a-field h-20 py-2" value={form.pickup_info} onChange={(e) => set('pickup_info', e.target.value)} />
+          </label>
+          <label className="a-label">
+            Delivery en la ciudad
+            <textarea className="a-field h-20 py-2" value={form.delivery_info} onChange={(e) => set('delivery_info', e.target.value)} />
+          </label>
+          <label className="a-label">
+            Envío nacional
+            <textarea className="a-field h-20 py-2" value={form.shipping_info} onChange={(e) => set('shipping_info', e.target.value)} />
+          </label>
+          <Agencies list={form.agencies} onChange={(v) => set('agencies', v)} />
+        </Section>
+      )
+    }
+
+    // otros
     return (
-      <Section title="Métodos de pago" back={() => setView('lista')} error={error} hideSave>
-        <p className="text-sm text-muted">Prende o apaga cada método con el interruptor. Toca uno para cambiar sus datos.</p>
-        <div className="flex flex-col gap-2">
-          {form.payment_methods.map((m, i) => (
-            <div key={i} className={`flex items-center gap-3 rounded-2xl border p-3 ${m.enabled ? 'border-line bg-white' : 'border-dashed border-line2 bg-cream/60'}`}>
-              <button type="button" className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => setView({ pago: i })}>
-                <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${m.enabled ? 'bg-blush' : 'bg-sand'}`}>
-                  <Icon name="card" size={18} />
-                </span>
-                <span className="min-w-0">
-                  <span className="block truncate font-bold">{m.name || 'Sin nombre'}</span>
-                  <span className="block truncate text-xs text-muted">
-                    {CURRENCY_LABEL[m.currency]}
-                    {m.cash ? ' · efectivo' : m.fields.filter((f) => f.value.trim()).length ? ` · ${m.fields.filter((f) => f.value.trim()).length} datos` : ' · faltan los datos'}
-                  </span>
-                </span>
-              </button>
-              <Switch
-                on={m.enabled}
-                label={`${m.enabled ? 'Apagar' : 'Prender'} ${m.name}`}
-                onChange={(v) => {
-                  const next = { ...form, payment_methods: form.payment_methods.map((x, j) => (j === i ? { ...x, enabled: v } : x)) }
-                  void save(next, v ? `${m.name} prendido` : `${m.name} apagado`, false)
-                }}
-              />
-            </div>
-          ))}
+      <Section title="Otros ajustes" {...common} backOnDesktop={false}>
+        <label className="a-label">
+          Nombre de la tienda
+          <input className="a-field" value={form.store_name} onChange={(e) => set('store_name', e.target.value)} />
+          <span className="font-normal text-muted">Sale en los mensajes de WhatsApp de los pedidos.</span>
+        </label>
+        <label className="a-label">
+          Tasa en pesos (opcional)
+          <input
+            className="a-field"
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="1"
+            value={form.cop_rate ?? ''}
+            onChange={(e) => set('cop_rate', e.target.value === '' ? null : Number(e.target.value))}
+            placeholder="Vacío = no se calcula en pesos"
+          />
+          <span className="font-normal text-muted">Pesos por 1 dólar. Solo hace falta si aceptas pagos en pesos.</span>
+        </label>
+        <div className="a-label">
+          Horas que se apartan los productos de un pedido sin pagar
+          <Stepper value={form.reserve_hours} min={0} max={168} onChange={(v) => set('reserve_hours', v)} />
+          <span className="font-normal text-muted">
+            {form.reserve_hours > 0
+              ? `Si un pedido sigue "Por confirmar" después de ${hoursText(form.reserve_hours)}, se cancela solo y los productos vuelven a la tienda.`
+              : 'En 0 los pedidos sin pagar quedan apartados hasta que los canceles tú.'}
+          </span>
         </div>
-        <button
-          type="button"
-          className="flex h-12 items-center justify-center gap-2 rounded-xl border-[1.5px] border-dashed border-mauve text-sm font-semibold"
-          onClick={() => {
-            set('payment_methods', [...form.payment_methods, { name: '', currency: 'USD', note: '', fields: [], enabled: true, cash: false }])
-            setView({ pago: form.payment_methods.length })
-          }}
-        >
-          <Icon name="plus" size={16} /> Agregar método de pago
-        </button>
-        <Toast text={toast} />
       </Section>
     )
   }
 
-  // ---------- Secciones simples ----------
-  const common = {
-    back: () => {
-      setForm(settings)
-      setView('lista')
-    },
-    error,
-    saving,
-    onSave: () => void save()
-  }
-
-  if (view === 'whatsapp') {
-    return (
-      <Section title="WhatsApp de la tienda" {...common}>
-        <p className="text-sm text-muted">A este número llegan los pedidos y las preguntas de las clientas.</p>
-        <label className="a-label">
-          Número con código de país
-          <input className="a-field h-12 text-lg font-semibold" type="tel" inputMode="tel" value={form.whatsapp} onChange={(e) => set('whatsapp', e.target.value)} placeholder="584141234567" />
-          <span className="font-normal text-muted">Para Venezuela empieza con 58 y va sin el 0. Ej.: 0414-1234567 se escribe 584141234567.</span>
-        </label>
-      </Section>
-    )
-  }
-
-  if (view === 'mayor') {
-    return (
-      <Section title="Precio al mayor" {...common}>
-        <Toggle on={form.wholesale_min > 0} onChange={(v) => set('wholesale_min', v ? 6 : 0)} title="Usar precio al mayor" hint="Si está apagado, todo se cobra al detal." />
-        {form.wholesale_min > 0 && (
-          <>
-            <div className="a-label">
-              ¿Desde cuántos productos?
-              <Stepper value={form.wholesale_min} min={2} onChange={(v) => set('wholesale_min', v)} />
-            </div>
-            <p className="rounded-2xl bg-blush px-4 py-3 text-sm">
-              Si la clienta lleva <b>{form.wholesale_min} productos o más</b> (puede mezclar), los que tienen precio al mayor se le cobran al mayor. Las brochas, la crema y lo que solo se vende al detal no cuentan.
-            </p>
-          </>
-        )}
-      </Section>
-    )
-  }
-
-  if (view === 'entregas') {
-    return (
-      <Section title="Entregas y envíos" {...common}>
-        <p className="text-sm text-muted">Lo que lee la clienta debajo de cada forma de entrega.</p>
-        <label className="a-label">
-          Retiro personal
-          <textarea className="a-field h-20 py-2" value={form.pickup_info} onChange={(e) => set('pickup_info', e.target.value)} />
-        </label>
-        <label className="a-label">
-          Delivery en la ciudad
-          <textarea className="a-field h-20 py-2" value={form.delivery_info} onChange={(e) => set('delivery_info', e.target.value)} />
-        </label>
-        <label className="a-label">
-          Envío nacional
-          <textarea className="a-field h-20 py-2" value={form.shipping_info} onChange={(e) => set('shipping_info', e.target.value)} />
-        </label>
-        <Agencies list={form.agencies} onChange={(v) => set('agencies', v)} />
-      </Section>
-    )
-  }
-
-  // otros
   return (
-    <Section title="Otros ajustes" {...common}>
-      <label className="a-label">
-        Nombre de la tienda
-        <input className="a-field" value={form.store_name} onChange={(e) => set('store_name', e.target.value)} />
-        <span className="font-normal text-muted">Sale en los mensajes de WhatsApp de los pedidos.</span>
-      </label>
-      <label className="a-label">
-        Tasa en pesos (opcional)
-        <input
-          className="a-field"
-          type="number"
-          inputMode="decimal"
-          min="0"
-          step="1"
-          value={form.cop_rate ?? ''}
-          onChange={(e) => set('cop_rate', e.target.value === '' ? null : Number(e.target.value))}
-          placeholder="Vacío = no se calcula en pesos"
-        />
-        <span className="font-normal text-muted">Pesos por 1 dólar. Solo hace falta si aceptas pagos en pesos.</span>
-      </label>
-      <div className="a-label">
-        Horas que se apartan los productos de un pedido sin pagar
-        <Stepper value={form.reserve_hours} min={0} max={168} onChange={(v) => set('reserve_hours', v)} />
-        <span className="font-normal text-muted">
-          {form.reserve_hours > 0
-            ? `Si un pedido sigue "Por confirmar" después de ${hoursText(form.reserve_hours)}, se cancela solo y los productos vuelven a la tienda.`
-            : 'En 0 los pedidos sin pagar quedan apartados hasta que los canceles tú.'}
-        </span>
+    <>
+      <div className={view === 'lista' ? '' : 'hidden lg:block'}>
+        <PageTitle title="Ajustes" subtitle="Toca una sección para cambiarla." />
       </div>
-    </Section>
+      {/* Teléfono: lista o sección, una a la vez. Computadora: la lista a la izquierda y la sección abierta a la derecha */}
+      <div className="lg:grid lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)] lg:items-start lg:gap-8 2xl:grid-cols-[minmax(0,440px)_minmax(0,1fr)]">
+        <div className={view === 'lista' ? '' : 'hidden lg:block'}>{listPanel}</div>
+        <div className={view === 'lista' ? 'hidden lg:block' : ''}>
+          {view === 'lista' ? (
+            <div className="a-card flex min-h-[320px] flex-col items-center justify-center gap-3 p-8 text-center">
+              <span className="grid h-14 w-14 place-items-center rounded-full bg-blush">
+                <Icon name="gear" size={22} />
+              </span>
+              <p className="text-lg font-bold">Elige una sección</p>
+              <p className="max-w-xs text-sm text-muted">Toca cualquier sección de la izquierda y aquí se abre para cambiarla.</p>
+            </div>
+          ) : (
+            detail()
+          )}
+        </div>
+      </div>
+      <Toast text={toast} />
+      {dialog}
+    </>
   )
 }
 
@@ -411,9 +438,28 @@ function RateCard({ form, saving, onSave }: { form: Settings; saving: boolean; o
   )
 }
 
-function Row({ icon, title, summary, onClick, warn = false }: { icon: 'wa' | 'card' | 'sparkle' | 'truck' | 'gear'; title: string; summary: string; onClick: () => void; warn?: boolean }) {
+function Row({
+  icon,
+  title,
+  summary,
+  onClick,
+  warn = false,
+  active = false
+}: {
+  icon: 'wa' | 'card' | 'sparkle' | 'truck' | 'gear'
+  title: string
+  summary: string
+  onClick: () => void
+  warn?: boolean
+  active?: boolean
+}) {
   return (
-    <button type="button" onClick={onClick} className="flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-cream/60">
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={active ? 'true' : undefined}
+      className={`flex w-full items-center gap-3 px-4 py-4 text-left transition hover:bg-cream/60 ${active ? 'lg:bg-sand lg:shadow-[inset_4px_0_0_#6D5247] lg:hover:bg-sand' : ''}`}
+    >
       <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${warn ? 'bg-[#FBE3DE] text-[#8A2B1E]' : 'bg-blush'}`}>
         <Icon name={icon} size={19} />
       </span>
@@ -436,7 +482,8 @@ function Section({
   saving = false,
   onSave,
   hideSave = false,
-  extra
+  extra,
+  backOnDesktop = true
 }: {
   title: string
   back: () => void
@@ -447,10 +494,12 @@ function Section({
   onSave?: () => void
   hideSave?: boolean
   extra?: ReactNode
+  /** En computadora la lista ya está al lado, así que "volver a Ajustes" sobra */
+  backOnDesktop?: boolean
 }) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-4 pb-24 md:pb-0">
-      <button type="button" onClick={back} className="flex h-10 items-center gap-1.5 self-start rounded-full pr-3 text-sm font-semibold hover:bg-white">
+    <div className="mx-auto flex max-w-2xl flex-col gap-4 pb-24 md:pb-0 lg:mx-0 lg:max-w-3xl">
+      <button type="button" onClick={back} className={`flex h-10 items-center gap-1.5 self-start rounded-full pr-3 text-sm font-semibold hover:bg-white ${backOnDesktop ? '' : 'lg:hidden'}`}>
         <Icon name="back" size={18} /> {backLabel}
       </button>
       <h1 className="text-[26px] font-extrabold leading-tight">{title}</h1>
