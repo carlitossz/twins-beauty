@@ -87,8 +87,8 @@ function seed(): DemoDb {
           cash: false
         },
         { name: 'Efectivo $', currency: 'USD', note: 'Pagas en dólares al recibir.', fields: [], enabled: true, cash: true },
-        { name: 'Zelle', currency: 'USD', note: '', fields: [{ label: 'Correo', value: 'correo@ejemplo.com', copyable: true }, { label: 'Titular', value: 'Nombre del titular', copyable: false }], enabled: false, cash: false },
-        { name: 'Binance', currency: 'USD', note: '', fields: [{ label: 'ID Binance Pay', value: '000000000', copyable: true }], enabled: false, cash: false }
+        { name: 'Zelle', currency: 'USD', note: '', fields: [], enabled: true, cash: false },
+        { name: 'Binance', currency: 'USD', note: '', fields: [{ label: 'ID Binance Pay', value: '000000000', copyable: true }], enabled: true, cash: false }
       ]
     },
     products,

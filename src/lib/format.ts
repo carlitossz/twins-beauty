@@ -115,3 +115,11 @@ export function errorMessage(e: unknown) {
   if (e && typeof e === 'object' && 'message' in e) return String((e as { message: unknown }).message)
   return 'Algo salió mal. Intenta de nuevo.'
 }
+
+/**
+ * Método sin datos escritos (ej. Zelle, cuando la dueña prefiere no publicar su correo):
+ * a la clienta se le dice que los pida por WhatsApp, y el mensaje del pedido ya los pide.
+ */
+export function asksByWhatsApp(m: { cash: boolean; fields: { value: string }[] }) {
+  return !m.cash && !m.fields.some((f) => f.value.trim())
+}

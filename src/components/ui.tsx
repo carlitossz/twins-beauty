@@ -290,3 +290,23 @@ export function DemoBanner() {
   if (api.mode !== 'demo') return null
   return <div className="bg-cocoa px-4 py-1.5 text-center text-[11px] font-semibold text-cream">Versión de prueba · los datos se guardan solo en este navegador</div>
 }
+
+/** Método cuyos datos se dan por WhatsApp (no están publicados en la página, ej. Zelle) */
+export function PaymentByWhatsAppBox({ name, note, sent = false }: { name: string; note: string; sent?: boolean }) {
+  return (
+    <div className="flex items-start gap-3 rounded-[20px] bg-blush p-4">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-cocoa text-cream">
+        <Icon name="wa" size={20} />
+      </span>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-bold">Los datos de {name} te los pasamos por WhatsApp</span>
+        <span className="text-[13px] leading-snug">
+          {sent
+            ? `Al enviar el pedido por WhatsApp ya van pedidos los datos de ${name}. Ahí te los pasamos para que hagas el pago.`
+            : `Haz tu pedido y, al enviarlo por WhatsApp, te pasamos los datos de ${name} para que pagues. El mensaje ya los pide por ti.`}
+        </span>
+        {note && <span className="text-[12px] text-muted">{note}</span>}
+      </div>
+    </div>
+  )
+}

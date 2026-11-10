@@ -202,6 +202,11 @@ export default function SettingsPage() {
                 <p className="text-sm font-bold">Datos para pagar</p>
                 <p className="text-xs text-muted">Lo que la clienta necesita para hacer el pago. Prende "Copiar" solo en lo que va a pegar en su banco (teléfono, cédula, cuenta).</p>
               </div>
+              {!m.fields.some((f) => f.value.trim()) && (
+                <p className="rounded-2xl bg-blush px-3 py-2.5 text-xs font-medium leading-snug">
+                  Sin datos escritos, a la clienta le sale que los datos de {m.name || 'este método'} se los pasas por WhatsApp, y el mensaje del pedido ya te los pide. Úsalo si prefieres no publicar algo (por ejemplo tu correo de Zelle).
+                </p>
+              )}
               {m.fields.map((f, k) => (
                 <div key={k} className="flex flex-col gap-2 rounded-2xl border border-line bg-cream/50 p-3">
                   <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">

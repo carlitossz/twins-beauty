@@ -1,6 +1,6 @@
 import { Link, useLocation, useParams } from 'react-router-dom'
-import { DemoBanner, Icon, Logo, PaymentDetailsBox, Star } from '../../components/ui'
-import { hoursText } from '../../lib/format'
+import { DemoBanner, Icon, Logo, PaymentByWhatsAppBox, PaymentDetailsBox, Star } from '../../components/ui'
+import { hoursText, asksByWhatsApp } from '../../lib/format'
 import { useSettings } from '../../lib/store'
 import { waLink } from '../../lib/whatsapp'
 import { LAST_ORDER_KEY } from './Checkout'
@@ -73,7 +73,8 @@ export default function OrderDone() {
               <a href={waLink(settings?.whatsapp ?? '', done.message)} target="_blank" rel="noreferrer" className="btn-primary w-full">
                 <Icon name="wa" size={22} /> Enviar pedido por WhatsApp
               </a>
-              {method && !method.cash && <PaymentDetailsBox name={method.name} note={method.note} fields={method.fields} cash={false} amount={done.paymentAmount} />}
+              {method && !method.cash && asksByWhatsApp(method) && <PaymentByWhatsAppBox name={method.name} note={method.note} sent />}
+              {method && !method.cash && !asksByWhatsApp(method) && <PaymentDetailsBox name={method.name} note={method.note} fields={method.fields} cash={false} amount={done.paymentAmount} />}
               <details className="rounded-[20px] bg-white p-4 text-sm">
                 <summary className="cursor-pointer font-semibold">Ver el mensaje</summary>
                 <pre className="mt-3 whitespace-pre-wrap font-sans text-[13px] leading-relaxed">{done.message}</pre>

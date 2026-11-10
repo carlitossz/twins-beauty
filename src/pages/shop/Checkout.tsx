@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { ShopShell } from '../../components/ShopLayout'
-import { BackButton, Icon, PaymentDetailsBox, Spinner, ToneDot } from '../../components/ui'
+import { BackButton, Icon, PaymentByWhatsAppBox, PaymentDetailsBox, Spinner, ToneDot } from '../../components/ui'
 import { api } from '../../lib/api'
-import { amountIn, convert, errorMessage, hoursText, money, usd } from '../../lib/format'
+import { amountIn, convert, errorMessage, hoursText, money, usd, asksByWhatsApp } from '../../lib/format'
 import { useCart, useSettings } from '../../lib/store'
 import type { Currency, Delivery } from '../../lib/types'
 import { orderMessage } from '../../lib/whatsapp'
@@ -115,7 +115,8 @@ export default function Checkout() {
         storeName: settings?.store_name ?? 'Twins Beauty',
         result,
         items: cart.items.map((i, k) => ({ name: i.name, tone: i.tone, qty: i.qty, unit: cart.pricing.unit[k] })),
-        order
+        order,
+        askPaymentData: asksByWhatsApp(selected)
       })
       const done = {
         code: result.code,
@@ -315,6 +316,8 @@ export default function Checkout() {
                       <span className="rounded-2xl bg-blush px-3 py-2 text-sm font-semibold">Te devolvemos {money(selected.currency, { usd: changeDue, bs: changeDue, cop: changeDue })} de vuelto.</span>
                     )}
                   </div>
+                ) : asksByWhatsApp(selected) ? (
+                  <PaymentByWhatsAppBox name={selected.name} note={selected.note} />
                 ) : (
                   <PaymentDetailsBox name={selected.name} note={selected.note} fields={selected.fields} cash={selected.cash} amount={bankAmount(selected.currency, totals)} />
                 )}
